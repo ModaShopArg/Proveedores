@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Proveedores - Dashboard Corporativo Premium</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos de alta calidad -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos interactivos dinámicos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* ESTILOS DE IMPRESIÓN PREMIUM (Optimizados para Exportación a PDF) */
+        @media print {
+            body.printing-active {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            body.printing-active * {
+                background: transparent !important;
+                color: #000000 !important;
+                border-color: #cbd5e1 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            /* Ocultar elementos innecesarios */
+            body.printing-active header,
+            body.printing-active aside,
+            body.printing-active .tab-btn,
+            body.printing-active button,
+            body.printing-active form,
+            body.printing-active .filtro-print-hide,
+            body.printing-active #toast,
+            body.printing-active .fixed {
+                display: none !important;
+            }
+            /* Forzar el contenedor del target a ocupar toda la pantalla */
+            body.printing-active .print-target {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                z-index: 9999 !important;
+                padding: 10px !important;
+                margin: 0 !important;
+            }
+            /* Asegurar legibilidad de tablas */
+            body.printing-active table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 15px !important;
+            }
+            body.printing-active th {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+                font-weight: bold !important;
+                border: 1px solid #94a3b8 !important;
+            }
+            body.printing-active td {
+                border: 1px solid #e2e8f0 !important;
+                padding: 8px !important;
+            }
+            body.printing-active h1, 
+            body.printing-active h2, 
+            body.printing-active h3 {
+                color: #0f172a !important;
+                font-weight: bold !important;
+            }
+            /* Forzar gráficos a no desbordar */
+            body.printing-active canvas {
+                max-width: 100% !important;
+                height: 280px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col custom-scrollbar">
+
+    <!-- HEADER PRINCIPAL -->
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-square-poll-vertical text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold tracking-tight">PREMIUM SUPPLIER ACCOUNT</h1>
+                <p class="text-xs text-slate-400">Dashboard de Control y Auditoría de Cuentas Corrientes (2026 - 2030)</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <button onclick="abrirModalPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-700 px-3 py-2 rounded-lg text-xs font-semibold transition duration-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-file-pdf text-sm"></i> Exportar PDF
+            </button>
+            <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 hover:text-white px-3 py-2 rounded-lg text-xs transition duration-200">
+                <i class="fa-solid fa-download mr-1"></i> Respaldar JSON
+            </button>
+            <button onclick="confirmarReinicio()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800 text-rose-300 px-3 py-2 rounded-lg text-xs transition duration-200">
+                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Reiniciar Demo
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- BARRA LATERAL (NAVEGACIÓN) -->
+        <aside class="w-72 bg-slate-950 border-r border-slate-850 p-4 hidden lg:flex flex-col gap-3 shrink-0">
+            <p class="text-slate-500 uppercase tracking-widest text-[10px] font-bold px-3">Secciones</p>
+            <nav class="flex flex-col gap-1.5">
+                <button onclick="cambiarTab('dashboard')" id="btn-tab-dashboard" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-chart-pie text-base"></i> Resumen de Cuenta</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+                <button onclick="cambiarTab('ficha')" id="btn-tab-ficha" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-folder-open text-base"></i> Diagnóstico por Proveedor</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+                <button onclick="cambiarTab('facturas')" id="btn-tab-facturas" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-invoice-dollar text-base"></i> Ingreso Comprobantes</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+                <button onclick="cambiarTab('pagos')" id="btn-tab-pagos" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-wallet text-base"></i> Registrar Pagos / NC</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+                <button onclick="cambiarTab('historico')" id="btn-tab-historico" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-database text-base"></i> Carga Histórica Ene-Jun</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+            </nav>
+
+            <div class="px-2 mt-2">
+                <button onclick="toggleModalProveedor(true)" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-plus text-sm"></i> Nuevo Proveedor
+                </button>
+            </div>
+
+            <!-- ALERTAS CRÍTICAS DE VENCIMIENTO -->
+            <div class="mt-auto bg-slate-900/60 rounded-xl p-4 border border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas de Vencimiento</span>
+                    <span id="badge-alertas" class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="lista-alertas" class="flex flex-col gap-2 max-h-44 overflow-y-auto custom-scrollbar text-xs">
+                    <!-- Se carga dinámicamente -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- ESPACIO DE TRABAJO -->
+        <main class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-slate-900">
+            
+            <!-- CONTENIDO TAB: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content flex flex-col gap-6">
+                <!-- Filtros del Período -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-4 filtro-print-hide">
+                    <div>
+                        <h2 class="text-sm font-bold text-white">Consolidado del Período</h2>
+                        <p class="text-xs text-slate-400">Configura el rango de meses para recalcular compras, pagos y deudas corrientes (Soporta 2026 - 2030).</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-slate-400 font-semibold">Desde:</label>
+                            <select id="filtro-desde" onchange="actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
+                                <!-- Poblado dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-slate-400 font-semibold">Hasta:</label>
+                            <select id="filtro-hasta" onchange="actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
+                                <!-- Poblado dinámicamente -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRID DE KPIS CARD -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- KPI COMPRADO -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Comprado en Período</span>
+                            <span class="bg-blue-500/10 text-blue-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-basket-shopping"></i></span>
+                        </div>
+                        <div class="my-3">
+                            <h3 id="kpi-comprado" class="text-xl font-extrabold text-white">$0,00</h3>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500 border-t border-slate-900 pt-2">
+                            <span>A: <strong id="kpi-comprado-a" class="text-slate-300">$0,00</strong></span>
+                            <span>B: <strong id="kpi-comprado-b" class="text-slate-300">$0,00</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- KPI PAGADO -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Pagado en Período</span>
+                            <span class="bg-emerald-500/10 text-emerald-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                        </div>
+                        <div class="my-3">
+                            <h3 id="kpi-pagado" class="text-xl font-extrabold text-emerald-400">$0,00</h3>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500 border-t border-slate-900 pt-2">
+                            <span>A: <strong id="kpi-pagado-a" class="text-slate-300">$0,00</strong></span>
+                            <span>B: <strong id="kpi-pagado-b" class="text-slate-300">$0,00</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- KPI DEUDA ACTUAL -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Saldo Deuda General</span>
+                            <span class="bg-amber-500/10 text-amber-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-scale-unbalanced"></i></span>
+                        </div>
+                        <div class="my-3">
+                            <h3 id="kpi-saldo-deuda" class="text-xl font-extrabold text-amber-400">$0,00</h3>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500 border-t border-slate-900 pt-2">
+                            <span>A: <strong id="kpi-deuda-a" class="text-slate-300">$0,00</strong></span>
+                            <span>B: <strong id="kpi-deuda-b" class="text-slate-300">$0,00</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- KPI VENCIDO -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Vencido Exigible (A+B)</span>
+                            <span class="bg-rose-500/10 text-rose-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-circle-exclamation"></i></span>
+                        </div>
+                        <div class="my-3">
+                            <h3 id="kpi-vencido" class="text-xl font-extrabold text-rose-500">$0,00</h3>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500 border-t border-slate-900 pt-2">
+                            <span>Referencia: <strong class="text-rose-400">Fecha del Día</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCION GRAFICOS -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Gráfico Distribución Torta -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col justify-between h-96">
+                        <div>
+                            <h3 class="text-sm font-bold text-white mb-1">Distribución de Deuda</h3>
+                            <p class="text-xs text-slate-500">Monto Parte A contra Parte B</p>
+                        </div>
+                        <div class="relative flex-1 max-h-56 mt-4">
+                            <canvas id="chartPieAB"></canvas>
+                        </div>
+                        <div class="flex justify-around text-xs mt-4 pt-3 border-t border-slate-900">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 bg-blue-600 rounded-full"></span> Parte A</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 bg-indigo-400 rounded-full"></span> Parte B</span>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico Evolución Barras/Lineas -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col lg:col-span-2 h-96">
+                        <div>
+                            <h3 class="text-sm font-bold text-white mb-1">Evolución de Compras y Pagos</h3>
+                            <p class="text-xs text-slate-500">Mapeado dinámico según el período de tiempo seleccionado</p>
+                        </div>
+                        <div class="flex-1 mt-4 relative">
+                            <canvas id="chartEvolucion"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCION RANKING PROVEEDORES -->
+                <div class="bg-slate-950 rounded-2xl border border-slate-850 p-5">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Ranking de Proveedores</h3>
+                            <p class="text-xs text-slate-400">Ordenado por volumen de compra en el período consolidado.</p>
+                        </div>
+                        <div class="relative w-full md:w-72 filtro-print-hide">
+                            <input type="text" id="buscador-ranking" onkeyup="filtrarTablaRanking()" placeholder="Buscar proveedor..." class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400">
+                                    <th class="py-3 px-4 font-bold">#</th>
+                                    <th class="py-3 px-4 font-bold">Proveedor</th>
+                                    <th class="py-3 px-4 font-bold text-right">FAC Parte A</th>
+                                    <th class="py-3 px-4 font-bold text-right">Parte B</th>
+                                    <th class="py-3 px-4 font-bold text-right">Total Comprado</th>
+                                    <th class="py-3 px-4 font-bold text-right">Total Pagado</th>
+                                    <th class="py-3 px-4 font-bold text-right">Saldo Deuda</th>
+                                    <th class="py-3 px-4 font-bold text-center filtro-print-hide">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-ranking">
+                                <!-- Se carga dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTENIDO TAB: DIAGNÓSTICO POR PROVEEDOR (FICHA INDIVIDUAL) -->
+            <section id="tab-ficha" class="tab-content flex flex-col gap-6 hidden">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-4 filtro-print-hide">
+                    <div>
+                        <h2 class="text-sm font-bold text-white">Diagnóstico 360° del Proveedor</h2>
+                        <p class="text-xs text-slate-400">Selecciona un proveedor para auditar su estado contable, plazos e historial cruzado.</p>
+                    </div>
+                    <div class="w-full md:w-80">
+                        <select id="select-ficha-proveedor" onchange="cargarDiagnosticoProveedor()" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                            <!-- Se carga dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+
+                <div id="diagnostico-vacio" class="bg-slate-950 rounded-2xl border border-slate-850 p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+                    <i class="fa-solid fa-address-card text-4xl text-slate-600"></i>
+                    <p class="text-xs">Por favor, seleccione un proveedor en el panel superior para cargar la ficha de diagnóstico.</p>
+                </div>
+
+                <div id="diagnostico-contenido" class="flex flex-col gap-6 hidden">
+                    <!-- Cabecera de Ficha con Ajuste de Plazo -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h2 id="f-proveedor-titulo" class="text-base font-bold text-white uppercase tracking-tight">Razón Social</h2>
+                            <p class="text-xs text-slate-400">Configuración operativa del proveedor seleccionado.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-slate-900/80 border border-slate-800 px-3.5 py-2 rounded-xl text-xs flex items-center gap-2">
+                                <span class="text-slate-400"><i class="fa-solid fa-clock text-blue-400"></i> Plazo Actual:</span>
+                                <strong id="f-proveedor-plazo-txt" class="text-white">30 días</strong>
+                            </div>
+                            <button onclick="abrirModalEditarPlazo()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition duration-200 flex items-center gap-1.5 filtro-print-hide">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar Plazo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ficha KPIs -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Total Comprado (A+B)</span>
+                            <h4 id="f-kpi-comprado" class="text-lg font-bold text-white">$0,00</h4>
+                            <div class="flex justify-between text-[9px] text-slate-500 mt-2 pt-2 border-t border-slate-900">
+                                <span>Parte A: <strong id="f-kpi-comprado-a">$0,00</strong></span>
+                                <span>Parte B: <strong id="f-kpi-comprado-b">$0,00</strong></span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Total Pagado (A+B)</span>
+                            <h4 id="f-kpi-pagado" class="text-lg font-bold text-emerald-400">$0,00</h4>
+                            <div class="flex justify-between text-[9px] text-slate-500 mt-2 pt-2 border-t border-slate-900">
+                                <span>Parte A: <strong id="f-kpi-pagado-a">$0,00</strong></span>
+                                <span>Parte B: <strong id="f-kpi-pagado-b">$0,00</strong></span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Saldo de Cuenta Actual</span>
+                            <h4 id="f-kpi-saldo" class="text-lg font-bold text-amber-500">$0,00</h4>
+                            <div class="flex justify-between text-[9px] text-slate-500 mt-2 pt-2 border-t border-slate-900">
+                                <span>Vencido: <strong id="f-kpi-vencido" class="text-rose-400">$0,00</strong></span>
+                                <span>A Vencer: <strong id="f-kpi-a-vencer" class="text-blue-400">$0,00</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movimientos Cruzados -->
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-5">
+                        <h3 class="text-xs font-bold text-white uppercase mb-4 tracking-wider">Cronología Completa de Movimientos (CC)</h3>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-850 text-slate-400">
+                                        <th class="py-3 px-4 font-bold">Fecha</th>
+                                        <th class="py-3 px-4 font-bold">Concepto</th>
+                                        <th class="py-3 px-4 font-bold">ID / Ref</th>
+                                        <th class="py-3 px-4 font-bold text-right">Monto Parte A</th>
+                                        <th class="py-3 px-4 font-bold text-right">Monto Parte B</th>
+                                        <th class="py-3 px-4 font-bold text-right">Total Transac.</th>
+                                        <th class="py-3 px-4 font-bold text-center">Estado / Vto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="f-tabla-cronologia">
+                                    <!-- Se carga dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTENIDO TAB: INGRESO COMPROBANTES (JULIO EN ADELANTE) -->
+            <section id="tab-facturas" class="tab-content flex flex-col gap-6 hidden">
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Formulario de carga -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 xl:col-span-1 filtro-print-hide">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="bg-blue-600/20 text-blue-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-file-invoice"></i></div>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Cargar Comprobante</h3>
+                        </div>
+
+                        <form id="form-factura" onsubmit="guardarFactura(event)" class="flex flex-col gap-4 text-xs">
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Fecha Emisión</label>
+                                <input type="date" id="fac-fecha" min="2026-01-01" max="2030-12-31" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Proveedor</label>
+                                <select id="fac-proveedor" required onchange="actualizarPlazoSugerido()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                    <!-- Cargado dinámicamente -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Tipo de Comprobante</label>
+                                <select id="fac-tipo" onchange="verificarTipoComprobante()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                    <option value="Factura">Factura de Compra (+ Deuda)</option>
+                                    <option value="Nota de Crédito">Nota de Crédito (- Deuda)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Plazo de Pago (Días)</label>
+                                <input type="number" id="fac-plazo" min="0" value="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-slate-400 font-semibold mb-1">Monto Parte A</label>
+                                    <input type="number" id="fac-monto-a" step="0.01" min="0" value="0.00" onkeyup="calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 font-semibold mb-1">Monto Parte B</label>
+                                    <input type="number" id="fac-monto-b" step="0.01" min="0" value="0.00" onkeyup="calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center my-1">
+                                <span class="font-bold text-slate-400">Total Calculado (A+B):</span>
+                                <span id="fac-total-calculado" class="font-extrabold text-white text-sm">$0,00</span>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Detalle / Notas</label>
+                                <textarea id="fac-obs" placeholder="Ej. Lote de materia prima..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 h-16 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar Comprobante
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Listado detallado de facturas cargadas en período -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 xl:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Registro Detallado (Segundo Semestre en adelante)</h3>
+                            <div class="overflow-x-auto custom-scrollbar">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="border-b border-slate-850 text-slate-400 font-semibold">
+                                            <th class="py-3 px-3">ID Transac</th>
+                                            <th class="py-3 px-3">Fecha</th>
+                                            <th class="py-3 px-3">Proveedor</th>
+                                            <th class="py-3 px-3">Tipo</th>
+                                            <th class="py-3 px-3 text-right">Parte A</th>
+                                            <th class="py-3 px-3 text-right">Parte B</th>
+                                            <th class="py-3 px-3 text-right">Total</th>
+                                            <th class="py-3 px-3 text-center">Vto / Alerta</th>
+                                            <th class="py-3 px-3 text-center filtro-print-hide">Borrar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-facturas-lista">
+                                        <!-- Se carga dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTENIDO TAB: REGISTRO DE PAGOS -->
+            <section id="tab-pagos" class="tab-content flex flex-col gap-6 hidden">
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Formulario de Pagos -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 xl:col-span-1 filtro-print-hide">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="bg-emerald-600/20 text-emerald-400 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-money-bill-wave"></i></div>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Cargar Pago / Abono</h3>
+                        </div>
+
+                        <form id="form-pago" onsubmit="guardarPago(event)" class="flex flex-col gap-4 text-xs">
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Fecha de Operación</label>
+                                <input type="date" id="pago-fecha" min="2026-01-01" max="2030-12-31" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Proveedor</label>
+                                <select id="pago-proveedor" onchange="actualizarFacturasParaPago()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                    <!-- Cargado dinámicamente -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Imputar a Factura Específica</label>
+                                <select id="pago-factura-ref" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-300 focus:outline-none focus:border-blue-500">
+                                    <option value="">-- Sin Imputar (Pago a Cuenta General) --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Forma de Pago</label>
+                                <select id="pago-forma" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                    <option value="Transferencia">Transferencia Bancaria</option>
+                                    <option value="Deposito">Depósito en Efectivo</option>
+                                    <option value="Cheque Fisico">Cheque Físico Diferido</option>
+                                    <option value="e-Check">e-Check Electrónico</option>
+                                    <option value="Pago de Clientes">Pago de Clientes (Endoso de Valores)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 font-semibold mb-1">Nro de Transacción / Cheque / Referencia</label>
+                                <input type="text" id="pago-ref-num" required placeholder="Ej. CHK-1088492" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-slate-400 font-semibold mb-1">Abono Parte A</label>
+                                    <input type="number" id="pago-monto-a" step="0.01" min="0" value="0.00" onkeyup="calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 font-semibold mb-1">Abono Parte B</label>
+                                    <input type="number" id="pago-monto-b" step="0.01" min="0" value="0.00" onkeyup="calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center my-1">
+                                <span class="font-bold text-slate-400">Total Pago (A+B):</span>
+                                <span id="pago-total-calculado" class="font-extrabold text-emerald-400 text-sm">$0,00</span>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-lg shadow-emerald-500/10">
+                                <i class="fa-solid fa-wallet mr-1"></i> Guardar Pago
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Listado de pagos cargados -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 xl:col-span-2">
+                        <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Abonos y Conciliaciones Recientes</h3>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-850 text-slate-400 font-semibold">
+                                        <th class="py-3 px-3">ID Pago</th>
+                                        <th class="py-3 px-3">Fecha</th>
+                                        <th class="py-3 px-3">Proveedor</th>
+                                        <th class="py-3 px-3">Medio de Pago</th>
+                                        <th class="py-3 px-3 text-right">Abono A</th>
+                                        <th class="py-3 px-3 text-right">Abono B</th>
+                                        <th class="py-3 px-3 text-right">Abono Total</th>
+                                        <th class="py-3 px-3 text-center">Ref Doc</th>
+                                        <th class="py-3 px-3 text-center filtro-print-hide">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-pagos-lista">
+                                    <!-- Se carga dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTENIDO TAB: CARGA HISTÓRICA ENE-JUN -->
+            <section id="tab-historico" class="tab-content flex flex-col gap-6 hidden">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-white">Acumulado del Primer Semestre (Enero - Junio 2026)</h2>
+                            <p class="text-xs text-slate-400">Modifica directamente los totales consolidados de la primera mitad del año sin tener que cargar los comprobantes individuales.</p>
+                        </div>
+                        <span class="text-xs bg-indigo-950/60 border border-indigo-800 text-indigo-300 px-3 py-1.5 rounded-lg font-semibold filtro-print-hide">
+                            <i class="fa-solid fa-cloud mr-1"></i> Guardado Automático por Fila
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400">
+                                    <th class="py-3 px-4 font-bold">Razón Social o Proveedor</th>
+                                    <th class="py-3 px-4 font-bold text-center">Compras Totales Parte A</th>
+                                    <th class="py-3 px-4 font-bold text-center">Compras Totales Parte B</th>
+                                    <th class="py-3 px-4 font-bold text-center">Pagado Total Ene-Jun</th>
+                                    <th class="py-3 px-4 font-bold text-center">Saldo Arrastrado</th>
+                                    <th class="py-3 px-4 font-bold text-center filtro-print-hide">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-historica-carga">
+                                <!-- Se carga dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL AGREGAR PROVEEDOR -->
+    <div id="modal-proveedor" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-blue-600/20 text-blue-400 p-2 rounded-lg">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Registrar Nuevo Proveedor</h3>
+                </div>
+                <button onclick="toggleModalProveedor(false)" class="text-slate-400 hover:text-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="form-nuevo-proveedor" onsubmit="agregarProveedor(event)" class="flex flex-col gap-4 text-xs">
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1.5">Nombre o Razón Social</label>
+                    <input type="text" id="prov-nombre" required placeholder="Ej: IMPORTADORA TEXTIL S.A." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1.5">Plazo de Pago Predeterminado (Días)</label>
+                    <input type="number" id="prov-plazo" min="0" value="30" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 text-xs">
+                    <p class="text-[10px] text-slate-500 mt-1">Plazo base para proyecciones de vencimientos en facturas.</p>
+                </div>
+                <div class="flex justify-end gap-3 mt-2">
+                    <button type="button" onclick="toggleModalProveedor(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20">
+                        Crear Proveedor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR PLAZO PROVEEDOR -->
+    <div id="modal-editar-plazo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="modal-editar-plazo-content">
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-blue-600/20 text-blue-400 p-2 rounded-lg">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Editar Plazo de Pago</h3>
+                </div>
+                <button onclick="toggleModalEditarPlazo(false)" class="text-slate-400 hover:text-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="form-editar-plazo" onsubmit="guardarNuevoPlazo(event)" class="flex flex-col gap-4 text-xs">
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1.5">Proveedor Seleccionado</label>
+                    <input type="text" id="edit-prov-nombre" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-500 text-xs font-bold outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1.5">Nuevo Plazo de Pago Predeterminado (Días)</label>
+                    <input type="number" id="edit-prov-plazo" min="0" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 text-xs">
+                    <p class="text-[10px] text-slate-500 mt-1">Este nuevo plazo se aplicará a los futuros comprobantes cargados.</p>
+                </div>
+                <div class="flex justify-end gap-3 mt-2">
+                    <button type="button" onclick="toggleModalEditarPlazo(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EXPORTAR PDF (SELECCIÓN DE SECCIÓN) -->
+    <div id="modal-export-pdf" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="modal-export-pdf-content">
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center gap-2.5 text-indigo-400">
+                    <div class="bg-indigo-600/20 p-2 rounded-lg">
+                        <i class="fa-solid fa-file-pdf text-base"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Asistente de Exportación PDF</h3>
+                </div>
+                <button onclick="toggleModalPDF(false)" class="text-slate-400 hover:text-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="text-xs text-slate-300 mb-5 leading-relaxed">
+                <p class="mb-3">Selecciona el módulo del tablero que deseas exportar a formato PDF para imprimir o enviar por correo:</p>
+                
+                <div class="flex flex-col gap-2.5 mt-3">
+                    <label class="flex items-center gap-3 bg-slate-950 hover:bg-slate-850 p-3 rounded-xl border border-slate-800 cursor-pointer transition">
+                        <input type="radio" name="seccion-pdf" value="dashboard" checked class="text-blue-600 focus:ring-0">
+                        <div>
+                            <strong class="text-slate-100 block">Resumen de Cuenta (Dashboard)</strong>
+                            <span class="text-[10px] text-slate-500">Incluye KPIs del período, gráficos de deudas, evolución y tabla ranking.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 bg-slate-950 hover:bg-slate-850 p-3 rounded-xl border border-slate-800 cursor-pointer transition">
+                        <input type="radio" name="seccion-pdf" value="ficha" class="text-blue-600 focus:ring-0">
+                        <div>
+                            <strong class="text-slate-100 block">Diagnóstico por Proveedor (Ficha 360°)</strong>
+                            <span class="text-[10px] text-slate-500">Muestra los datos financieros individuales y la cronología total de la CC.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 bg-slate-950 hover:bg-slate-850 p-3 rounded-xl border border-slate-800 cursor-pointer transition">
+                        <input type="radio" name="seccion-pdf" value="facturas" class="text-blue-600 focus:ring-0">
+                        <div>
+                            <strong class="text-slate-100 block">Registro de Comprobantes (Facturas/NC)</strong>
+                            <span class="text-[10px] text-slate-500">Detalle tabular de todos los documentos cargados desde Julio de 2026.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 bg-slate-950 hover:bg-slate-850 p-3 rounded-xl border border-slate-800 cursor-pointer transition">
+                        <input type="radio" name="seccion-pdf" value="pagos" class="text-blue-600 focus:ring-0">
+                        <div>
+                            <strong class="text-slate-100 block">Registro de Pagos Realizados</strong>
+                            <span class="text-[10px] text-slate-500">Lista cronológica de transacciones de abonos y conciliaciones.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="toggleModalPDF(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="ejecutarExportacionPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-print mr-1"></i> Generar Reporte / PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMACION PERSONALIZADO -->
+    <div id="modal-confirm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="modal-confirm-content">
+            <div class="flex items-center gap-3 mb-4 text-amber-400">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Confirmar Acción</h3>
+            </div>
+            <p id="modal-confirm-text" class="text-xs text-slate-300 mb-5 leading-relaxed">¿Estás seguro de realizar esta acción? No se puede deshacer.</p>
+            <div class="flex justify-end gap-3">
+                <button id="btn-confirm-cancel" class="bg-slate-850 hover:bg-slate-800 text-slate-300 font-semibold px-4 py-2 rounded-lg text-xs transition">Cancelar</button>
+                <button id="btn-confirm-accept" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERTA PERSONALIZADO -->
+    <div id="modal-alert" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="modal-alert-content">
+            <div class="flex items-center gap-3 mb-4 text-blue-400">
+                <i id="modal-alert-icon" class="fa-solid fa-circle-info text-2xl"></i>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Atención</h3>
+            </div>
+            <p id="modal-alert-text" class="text-xs text-slate-300 mb-5 leading-relaxed">Mensaje de alerta de prueba.</p>
+            <div class="flex justify-end">
+                <button id="btn-alert-close" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIONES TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-blue-600 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toast-msg" class="text-xs font-semibold">Mensaje de notificación</span>
+    </div>
+
+    <!-- LOGICA DE CONTROL EN JAVASCRIPT -->
+    <script>
+        const PROVEEDORES_SEMILLA = [
+            { nombre: "TARGET", a: 6371778.36, b: 76606774.00, pagado: 29047443.33, plazo: 30 },
+            { nombre: "CITY GIRL", a: 0.00, b: 22815485.77, pagado: 7985420.00, plazo: 30 },
+            { nombre: "MODAX", a: 1189655.03, b: 7619361.85, pagado: 3083155.80, plazo: 15 },
+            { nombre: "MISS MEI - JULIETA", a: 0.00, b: 7694205.00, pagado: 2692971.00, plazo: 30 },
+            { nombre: "DAMIAN NAU", a: 279945.20, b: 5249801.57, pagado: 1935411.00, plazo: 45 },
+            { nombre: "PINK 21", a: 0.00, b: 4083001.83, pagado: 1429050.00, plazo: 30 },
+            { nombre: "THELMA Y LOUIS", a: 0.00, b: 2838819.50, pagado: 993586.00, plazo: 30 },
+            { nombre: "FERPAMAR", a: 1494516.11, b: 1348864.23, pagado: 995183.00, plazo: 15 },
+            { nombre: "LAUTIN", a: 995144.12, b: 798249.71, pagado: 627687.00, plazo: 30 },
+            { nombre: "TANGO EXPRESSO", a: 0.00, b: 2576194.42, pagado: 901668.00, plazo: 30 },
+            { nombre: "MELY COSMÉTICA", a: 0.00, b: 2102720.00, pagado: 735952.00, plazo: 30 },
+            { nombre: "PDB", a: 0.00, b: 1941927.13, pagado: 679674.00, plazo: 30 },
+            { nombre: "ALL BRANDS", a: 0.00, b: 1360410.61, pagado: 476143.00, plazo: 30 },
+            { nombre: "OMAR LENTES - NUEVO", a: 0.00, b: 850900.00, pagado: 297815.00, plazo: 30 },
+            { nombre: "POLIPLAST", a: 830031.25, b: 0.00, pagado: 290510.00, plazo: 30 },
+            { nombre: "CAREY", a: 47647.66, b: 606331.34, pagado: 228892.00, plazo: 30 },
+            { nombre: "JL IMPORTACIONES", a: 19392.68, b: 683690.54, pagado: 246079.00, plazo: 30 },
+            { nombre: "OMAR LENTES - VIEJO", a: 0.00, b: 550118.34, pagado: 192541.00, plazo: 30 },
+            { nombre: "TENDENCE (TARGET)", a: 170988.45, b: 413209.99, pagado: 204469.00, plazo: 30 },
+            { nombre: "EDI IMPORTACION", a: 0.00, b: 143644.42, pagado: 50275.00, plazo: 30 },
+            { nombre: "FASHION BIJOU S.A.", a: 143748.00, b: 331452.00, pagado: 166320.00, plazo: 30 },
+            { nombre: "LESEDIFE", a: 476062.96, b: 390288.00, pagado: 303222.00, plazo: 30 },
+            { nombre: "COLOURS S.A", a: 0.00, b: 37738.32, pagado: 13208.00, plazo: 30 },
+            { nombre: "CLICKER", a: 0.00, b: 19820.93, pagado: 6937.00, plazo: 30 },
+            { nombre: "TXT (Bolsas)", a: 0.00, b: 129600.00, pagado: 45360.00, plazo: 30 },
+            { nombre: "WABRO", a: 95299.98, b: 0.00, pagado: 33355.00, plazo: 30 },
+            { nombre: "WATOTO - CINTAS Y FILM", a: 169700.95, b: 0.00, pagado: 59395.00, plazo: 30 },
+            { nombre: "BAG COMPANY - TARGET", a: -3278.60, b: 2077.92, pagado: 0.00, plazo: 30 },
+            { nombre: "QUO", a: 0.00, b: 640.47, pagado: 224.00, plazo: 30 }
+        ];
+
+        let state = {
+            proveedores: [],
+            facturas: [],
+            pagos: []
+        };
+
+        let chartPie = null;
+        let chartEvo = null;
+
+        // Formateador monetario para moneda argentina ARS
+        const formatter = new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 2
+        });
+
+        // MODALS PERSONALIZADOS (REEMPLAZO DE CONFIRM Y ALERT)
+        let onConfirmCallback = null;
+
+        function showConfirm(message, callback) {
+            onConfirmCallback = callback;
+            document.getElementById('modal-confirm-text').innerText = message;
+            const modal = document.getElementById('modal-confirm');
+            const content = document.getElementById('modal-confirm-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirm(accepted) {
+            const modal = document.getElementById('modal-confirm');
+            const content = document.getElementById('modal-confirm-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if (accepted && onConfirmCallback) {
+                    onConfirmCallback();
+                }
+                onConfirmCallback = null;
+            }, 300);
+        }
+
+        function showAlert(message, iconClass = 'fa-circle-info', colorClass = 'text-blue-400') {
+            document.getElementById('modal-alert-text').innerText = message;
+            const iconEl = document.getElementById('modal-alert-icon');
+            iconEl.className = `fa-solid ${iconClass} text-2xl`;
+            
+            const titleParent = iconEl.parentElement;
+            titleParent.className = `flex items-center gap-3 mb-4 ${colorClass}`;
+
+            const modal = document.getElementById('modal-alert');
+            const content = document.getElementById('modal-alert-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeAlert() {
+            const modal = document.getElementById('modal-alert');
+            const content = document.getElementById('modal-alert-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // CONTROL DE MODAL PROVEEDORES
+        function toggleModalProveedor(show) {
+            const modal = document.getElementById('modal-proveedor');
+            const content = document.getElementById('modal-content');
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+                document.getElementById('form-nuevo-proveedor').reset();
+            }
+        }
+
+        // CONTROL DE MODAL EDITAR PLAZO PROVEEDOR
+        function toggleModalEditarPlazo(show, provNombre = "") {
+            const modal = document.getElementById('modal-editar-plazo');
+            const content = document.getElementById('modal-editar-plazo-content');
+            if (show) {
+                const provObj = state.proveedores.find(p => p.nombre === provNombre);
+                if (!provObj) return;
+
+                document.getElementById('edit-prov-nombre').value = provNombre;
+                document.getElementById('edit-prov-plazo').value = provObj.plazoPredeterminado || 30;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function abrirModalEditarPlazo() {
+            const prov = document.getElementById('select-ficha-proveedor').value;
+            if (prov) {
+                toggleModalEditarPlazo(true, prov);
+            }
+        }
+
+        function guardarNuevoPlazo(event) {
+            event.preventDefault();
+            const provNombre = document.getElementById('edit-prov-nombre').value;
+            const nuevoPlazo = parseInt(document.getElementById('edit-prov-plazo').value) || 30;
+
+            const idx = state.proveedores.findIndex(p => p.nombre === provNombre);
+            if (idx !== -1) {
+                state.proveedores[idx].plazoPredeterminado = nuevoPlazo;
+                guardarEstado();
+                cargarDiagnosticoProveedor();
+                actualizarPlazoSugerido();
+                toggleModalEditarPlazo(false);
+                showToast(`Plazo de ${provNombre} actualizado a ${nuevoPlazo} días.`, "fa-clock", "bg-emerald-600");
+            }
+        }
+
+        // INICIALIZADOR DE SELECTORES DE FECHAS DINÁMICAS (2026-2030)
+        function inicializarSelectoresFechas() {
+            const selectDesde = document.getElementById('filtro-desde');
+            const selectHasta = document.getElementById('filtro-hasta');
+            if (!selectDesde || !selectHasta) return;
+
+            const meses = [
+                { v: '01', n: 'Enero' }, { v: '02', n: 'Febrero' }, { v: '03', n: 'Marzo' },
+                { v: '04', n: 'Abril' }, { v: '05', n: 'Mayo' }, { v: '06', n: 'Junio' },
+                { v: '07', n: 'Julio' }, { v: '08', n: 'Agosto' }, { v: '09', n: 'Septiembre' },
+                { v: '10', n: 'Octubre' }, { v: '11', n: 'Noviembre' }, { v: '12', n: 'Diciembre' }
+            ];
+
+            let desdeHtml = '';
+            let hastaHtml = '';
+
+            for (let anio = 2026; anio <= 2030; anio++) {
+                for (const m of meses) {
+                    const val = `${anio}-${m.v}`;
+                    const label = `${m.n} ${anio}`;
+                    
+                    const selDesde = (val === '2026-01') ? 'selected' : '';
+                    const selHasta = (val === '2026-12') ? 'selected' : '';
+
+                    desdeHtml += `<option value="${val}" ${selDesde}>${label}</option>`;
+                    hastaHtml += `<option value="${val}" ${selHasta}>${label}</option>`;
+                }
+            }
+
+            selectDesde.innerHTML = desdeHtml;
+            selectHasta.innerHTML = hastaHtml;
+        }
+
+        // EVENT LISTENERS DE MODALS
+        document.getElementById('btn-confirm-accept').addEventListener('click', () => closeConfirm(true));
+        document.getElementById('btn-confirm-cancel').addEventListener('click', () => closeConfirm(false));
+        document.getElementById('btn-alert-close').addEventListener('click', closeAlert);
+
+        // AGREGAR NUEVO PROVEEDOR
+        function agregarProveedor(event) {
+            event.preventDefault();
+            const nombreInput = document.getElementById('prov-nombre').value.trim().toUpperCase();
+            const plazoInput = parseInt(document.getElementById('prov-plazo').value) || 30;
+
+            if (!nombreInput) return;
+
+            const existe = state.proveedores.some(p => p.nombre === nombreInput);
+            if (existe) {
+                showToast("Este proveedor ya se encuentra registrado.", "fa-triangle-exclamation", "bg-rose-600");
+                return;
+            }
+
+            state.proveedores.push({
+                nombre: nombreInput,
+                plazoPredeterminado: plazoInput
+            });
+
+            // Registrar fila vacía de saldos iniciales del primer semestre
+            const histId = `HIST-${Date.now()}`;
+            state.facturas.push({
+                id: histId,
+                fecha: '2026-06-30',
+                proveedor: nombreInput,
+                tipo: 'Saldo Inicial (Ene-Jun)',
+                plazo: 0,
+                vencimiento: '2026-06-30',
+                montoA: 0.00,
+                montoB: 0.00,
+                total: 0.00,
+                obs: "Arranque consolidado 1er Semestre"
+            });
+
+            state.pagos.push({
+                id: `HPAG-${Date.now()}`,
+                fecha: '2026-06-30',
+                proveedor: nombreInput,
+                forma: 'Transferencia',
+                facturaRef: histId,
+                montoA: 0.00,
+                montoB: 0.00,
+                total: 0.00,
+                ref: "Abono Histórico"
+            });
+
+            guardarEstado();
+            actualizarSelectores();
+            actualizarTablas();
+            actualizarDashboard();
+
+            toggleModalProveedor(false);
+            showToast(`Proveedor ${nombreInput} creado correctamente.`, "fa-user-check", "bg-emerald-600");
+        }
+
+        // INICIALIZACIÓN DE LA APLICACIÓN
+        window.addEventListener('DOMContentLoaded', () => {
+            inicializarSelectoresFechas();
+            inicializarApp();
+        });
+
+        function inicializarApp() {
+            const stored = localStorage.getItem('supplier_app_state');
+            if (stored) {
+                try {
+                    state = JSON.parse(stored);
+                } catch(e) {
+                    console.error("Error al cargar localStorage, reiniciando.", e);
+                    cargarSemillaPorDefecto();
+                }
+            } else {
+                cargarSemillaPorDefecto();
+            }
+
+            // Asignación de fechas de referencia para cargas rápidas
+            const inputFechaFac = document.getElementById('fac-fecha');
+            const inputFechaPago = document.getElementById('pago-fecha');
+            
+            if(inputFechaFac) inputFechaFac.value = '2026-07-17';
+            if(inputFechaPago) inputFechaPago.value = '2026-07-17';
+
+            actualizarSelectores();
+            actualizarTablas();
+            actualizarDashboard();
+        }
+
+        function cargarSemillaPorDefecto() {
+            state.proveedores = PROVEEDORES_SEMILLA.map(p => ({
+                nombre: p.nombre,
+                plazoPredeterminado: p.plazo || 30
+            }));
+
+            // Carga de Comprobantes semilla del primer semestre
+            state.facturas = PROVEEDORES_SEMILLA.map((p, idx) => ({
+                id: `HIST-${1000 + idx}`,
+                fecha: '2026-06-30',
+                proveedor: p.nombre,
+                tipo: 'Saldo Inicial (Ene-Jun)',
+                plazo: 0,
+                vencimiento: '2026-06-30',
+                montoA: p.a,
+                montoB: p.b,
+                total: p.a + p.b,
+                obs: "Arranque consolidado 1er Semestre 2026"
+            }));
+
+            // Carga de Pagos del primer semestre
+            state.pagos = PROVEEDORES_SEMILLA.filter(p => p.pagado > 0).map((p, idx) => {
+                let totalC = p.a + p.b;
+                let propA = totalC > 0 ? (p.a / totalC) : 0;
+                let propB = totalC > 0 ? (p.b / totalC) : 0;
+                return {
+                    id: `HPAG-${1000 + idx}`,
+                    fecha: '2026-06-30',
+                    proveedor: p.nombre,
+                    forma: 'Transferencia',
+                    facturaRef: `HIST-${1000 + idx}`,
+                    montoA: Math.round(p.pagado * propA * 100) / 100,
+                    montoB: Math.round(p.pagado * propB * 100) / 100,
+                    total: p.pagado,
+                    ref: "Abono Histórico"
+                };
+            });
+
+            // Demo de transacciones activas de Julio de prueba
+            state.facturas.push({
+                id: "FAC-2001",
+                fecha: "2026-07-02",
+                proveedor: "TARGET",
+                tipo: "Factura",
+                plazo: 15,
+                vencimiento: "2026-07-17",
+                montoA: 150000.00,
+                montoB: 850000.00,
+                total: 1000000.00,
+                obs: "Mercadería detallada Julio"
+            });
+
+            state.facturas.push({
+                id: "FAC-2002",
+                fecha: "2026-07-05",
+                proveedor: "CITY GIRL",
+                tipo: "Factura",
+                plazo: 30,
+                vencimiento: "2026-08-05",
+                montoA: 0.00,
+                montoB: 1200000.00,
+                total: 1200000.00,
+                obs: "Segunda carga Julio"
+            });
+
+            guardarEstado();
+        }
+
+        function guardarEstado() {
+            localStorage.setItem('supplier_app_state', JSON.stringify(state));
+        }
+
+        function confirmarReinicio() {
+            showConfirm("¿Estás completamente seguro de que deseas restablecer los datos de demostración? Se borrará todo tu progreso.", () => {
+                cargarSemillaPorDefecto();
+                inicializarApp();
+                showToast("Datos restablecidos con éxito.", "fa-arrow-rotate-left", "bg-indigo-600");
+            });
+        }
+
+        // SISTEMA DE NAVEGACIÓN ENTRE TABS
+        function cambiarTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100";
+            });
+
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10";
+            }
+
+            if (tabId === 'dashboard') {
+                actualizarDashboard();
+            } else if (tabId === 'ficha') {
+                cargarDiagnosticoProveedor();
+            }
+        }
+
+        // ACTUALIZACIÓN DE SELECTORES
+        function actualizarSelectores() {
+            const selectFac = document.getElementById('fac-proveedor');
+            const selectPago = document.getElementById('pago-proveedor');
+            const selectFicha = document.getElementById('select-ficha-proveedor');
+
+            const provSorted = [...state.proveedores].sort((a,b) => a.nombre.localeCompare(b.nombre));
+            let optionsHtml = provSorted.map(p => `<option value="${p.nombre}">${p.nombre}</option>`).join('');
+
+            if (selectFac) selectFac.innerHTML = optionsHtml;
+            if (selectPago) selectPago.innerHTML = `<option value="">-- Seleccione un Proveedor --</option>` + optionsHtml;
+            if (selectFicha) selectFicha.innerHTML = `<option value="">-- Seleccione un Proveedor --</option>` + optionsHtml;
+
+            actualizarPlazoSugerido();
+        }
+
+        // SUGERIR EL PLAZO CONFIGURADO EN EL FORMULARIO DE INGRESO
+        function actualizarPlazoSugerido() {
+            const provSel = document.getElementById('fac-proveedor').value;
+            const inputPlazo = document.getElementById('fac-plazo');
+            if (!provSel || !inputPlazo) return;
+
+            const provObj = state.proveedores.find(p => p.nombre === provSel);
+            if (provObj) {
+                inputPlazo.value = provObj.plazoPredeterminado || 30;
+            }
+        }
+
+        // ACTUALIZACIÓN DE LISTADOS Y TABLAS
+        function actualizarTablas() {
+            // Tabla de Facturas cargadas (excluyendo históricos de semestres pasados)
+            const tbodyFac = document.getElementById('tabla-facturas-lista');
+            if (tbodyFac) {
+                const facturasNoHist = state.facturas.filter(f => !f.id.startsWith('HIST'));
+                if (facturasNoHist.length === 0) {
+                    tbodyFac.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500">No hay facturas detalladas ingresadas desde Julio de 2026. Use el formulario izquierdo.</td></tr>`;
+                } else {
+                    tbodyFac.innerHTML = facturasNoHist.map(f => {
+                        let alertClass = "text-slate-400";
+                        let alertText = f.tipo === 'Nota de Crédito' ? "N/A" : "En Fecha";
+                        
+                        if (f.tipo !== 'Nota de Crédito') {
+                            let hoy = new Date("2026-07-17");
+                            let vto = new Date(f.vencimiento);
+                            let saldo = f.total - calcularMontoPagadoDeFactura(f.id);
+
+                            if (saldo <= 1) {
+                                alertClass = "bg-emerald-950 text-emerald-400 border border-emerald-800";
+                                alertText = "Saldado";
+                            } else if (vto < hoy) {
+                                alertClass = "bg-rose-950 text-rose-400 border border-rose-800";
+                                alertText = "Vencido";
+                            } else if ((vto - hoy) / (1000 * 60 * 60 * 24) <= 7) {
+                                alertClass = "bg-amber-950 text-amber-400 border border-amber-800";
+                                alertText = "Prox Vto";
+                            } else {
+                                alertClass = "bg-blue-950 text-blue-400 border border-blue-800";
+                            }
+                        }
+
+                        return `
+                            <tr class="border-b border-slate-900 hover:bg-slate-950/40 transition">
+                                <td class="py-3 px-3 font-semibold text-slate-300">${f.id}</td>
+                                <td class="py-3 px-3 text-slate-400">${f.fecha}</td>
+                                <td class="py-3 px-3 font-medium text-white">${f.proveedor}</td>
+                                <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${f.tipo === 'Nota de Crédito' ? 'bg-purple-950 text-purple-400 border border-purple-800' : 'bg-slate-900'}">${f.tipo}</span></td>
+                                <td class="py-3 px-3 text-right text-slate-400">${formatter.format(f.montoA)}</td>
+                                <td class="py-3 px-3 text-right text-slate-400">${formatter.format(f.montoB)}</td>
+                                <td class="py-3 px-3 text-right font-bold text-white">${formatter.format(f.total)}</td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="px-2 py-1 rounded-md text-[10px] font-bold ${alertClass}">${f.tipo === 'Nota de Crédito' ? 'N/A' : f.vencimiento}</span>
+                                </td>
+                                <td class="py-3 px-3 text-center filtro-print-hide">
+                                    <button onclick="confirmarEliminarFactura('${f.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Tabla de Pagos
+            const tbodyPagos = document.getElementById('tabla-pagos-lista');
+            if (tbodyPagos) {
+                const pagosNoHist = state.pagos.filter(p => !p.id.startsWith('HPAG'));
+                if (pagosNoHist.length === 0) {
+                    tbodyPagos.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500">No se registran pagos activos ingresados. Use el formulario izquierdo.</td></tr>`;
+                } else {
+                    tbodyPagos.innerHTML = pagosNoHist.map(p => `
+                        <tr class="border-b border-slate-900 hover:bg-slate-950/40 transition">
+                            <td class="py-3 px-3 font-semibold text-slate-300">${p.id}</td>
+                            <td class="py-3 px-3 text-slate-400">${p.fecha}</td>
+                            <td class="py-3 px-3 font-medium text-white">${p.proveedor}</td>
+                            <td class="py-3 px-3"><span class="bg-slate-800 px-2.5 py-0.5 rounded text-[10px] text-slate-300 font-bold border border-slate-700">${p.forma}</span></td>
+                            <td class="py-3 px-3 text-right text-slate-400">${formatter.format(p.montoA)}</td>
+                            <td class="py-3 px-3 text-right text-slate-400">${formatter.format(p.montoB)}</td>
+                            <td class="py-3 px-3 text-right font-bold text-emerald-400">${formatter.format(p.total)}</td>
+                            <td class="py-3 px-3 text-center text-slate-300 font-semibold">${p.ref}</td>
+                            <td class="py-3 px-3 text-center filtro-print-hide">
+                                <button onclick="confirmarEliminarPago('${p.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            renderizarHistoricos();
+        }
+
+        // RENDERIZAR TABLA HISTÓRICA ENE-JUN
+        function renderizarHistoricos() {
+            const tbody = document.getElementById('tabla-historica-carga');
+            if (!tbody) return;
+
+            tbody.innerHTML = state.proveedores.map(p => {
+                let fHist = state.facturas.find(f => f.proveedor === p.nombre && f.tipo === 'Saldo Inicial (Ene-Jun)');
+                let pHist = state.pagos.find(pg => pg.proveedor === p.nombre && pg.ref === 'Abono Histórico');
+
+                let montoA = fHist ? fHist.montoA : 0;
+                let montoB = fHist ? fHist.montoB : 0;
+                let pagado = pHist ? pHist.total : 0;
+                let saldo = (montoA + montoB) - pagado;
+
+                return `
+                    <tr class="hover:bg-slate-950/30 border-b border-slate-850 transition">
+                        <td class="py-3 px-4 font-bold text-white text-xs">${p.nombre}</td>
+                        <td class="py-2 px-2 text-center">
+                            <input type="number" id="hist-a-${p.nombre.replace(/\s+/g, '_')}" step="0.01" value="${montoA}" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 w-36 text-right text-xs text-slate-200 focus:outline-none focus:border-blue-500 text-right">
+                        </td>
+                        <td class="py-2 px-2 text-center">
+                            <input type="number" id="hist-b-${p.nombre.replace(/\s+/g, '_')}" step="0.01" value="${montoB}" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 w-36 text-right text-xs text-slate-200 focus:outline-none focus:border-blue-500 text-right">
+                        </td>
+                        <td class="py-2 px-2 text-center">
+                            <input type="number" id="hist-p-${p.nombre.replace(/\s+/g, '_')}" step="0.01" value="${pagado}" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 w-36 text-right text-xs text-emerald-400 focus:outline-none focus:border-blue-500 text-right">
+                        </td>
+                        <td class="py-3 px-4 text-center font-bold text-slate-300 text-xs">${formatter.format(saldo)}</td>
+                        <td class="py-2 px-2 text-center filtro-print-hide">
+                            <button onclick="guardarFilaHistorica('${p.nombre}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition duration-150">
+                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Guardar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // GUARDAR CAMBIOS DE UNA FILA DE HISTÓRICOS
+        function guardarFilaHistorica(provNombre) {
+            let idString = provNombre.replace(/\s+/g, '_');
+            let valA = parseFloat(document.getElementById(`hist-a-${idString}`).value) || 0;
+            let valB = parseFloat(document.getElementById(`hist-b-${idString}`).value) || 0;
+            let valP = parseFloat(document.getElementById(`hist-p-${idString}`).value) || 0;
+
+            let idxF = state.facturas.findIndex(f => f.proveedor === provNombre && f.tipo === 'Saldo Inicial (Ene-Jun)');
+            if (idxF !== -1) {
+                state.facturas[idxF].montoA = valA;
+                state.facturas[idxF].montoB = valB;
+                state.facturas[idxF].total = valA + valB;
+            } else {
+                state.facturas.push({
+                    id: `HIST-${Date.now()}`,
+                    fecha: '2026-06-30',
+                    proveedor: provNombre,
+                    tipo: 'Saldo Inicial (Ene-Jun)',
+                    plazo: 0,
+                    vencimiento: '2026-06-30',
+                    montoA: valA,
+                    montoB: valB,
+                    total: valA + valB,
+                    obs: "Carga consolidada 1er Semestre 2026"
+                });
+            }
+
+            let idxP = state.pagos.findIndex(pg => pg.proveedor === provNombre && pg.ref === 'Abono Histórico');
+            if (idxP !== -1) {
+                let totalC = valA + valB;
+                let propA = totalC > 0 ? (valA / totalC) : 0;
+                let propB = totalC > 0 ? (valB / totalC) : 0;
+                
+                state.pagos[idxP].montoA = Math.round(valP * propA * 100) / 100;
+                state.pagos[idxP].montoB = Math.round(valP * propB * 100) / 100;
+                state.pagos[idxP].total = valP;
+            } else {
+                let totalC = valA + valB;
+                let propA = totalC > 0 ? (valA / totalC) : 0;
+                let propB = totalC > 0 ? (valB / totalC) : 0;
+
+                state.pagos.push({
+                    id: `HPAG-${Date.now()}`,
+                    fecha: '2026-06-30',
+                    proveedor: provNombre,
+                    forma: 'Transferencia',
+                    facturaRef: `HIST-${Date.now()}`,
+                    montoA: Math.round(valP * propA * 100) / 100,
+                    montoB: Math.round(valP * propB * 100) / 100,
+                    total: valP,
+                    ref: "Abono Histórico"
+                });
+            }
+
+            guardarEstado();
+            actualizarTablas();
+            actualizarDashboard();
+            showToast(`Saldo histórico de ${provNombre} actualizado.`, "fa-check", "bg-emerald-600");
+        }
+
+        function calcularMontoPagadoDeFactura(facturaId) {
+            return state.pagos
+                .filter(p => p.facturaRef === facturaId)
+                .reduce((acc, p) => acc + p.total, 0);
+        }
+
+        // CARGA Y LÓGICA DE FACTURAS
+        function calcularTotalFactura() {
+            let a = parseFloat(document.getElementById('fac-monto-a').value) || 0;
+            let b = parseFloat(document.getElementById('fac-monto-b').value) || 0;
+            const totalCalc = document.getElementById('fac-total-calculado');
+            if (totalCalc) totalCalc.innerText = formatter.format(a + b);
+        }
+
+        function verificarTipoComprobante() {
+            let tipo = document.getElementById('fac-tipo').value;
+            let plazoInput = document.getElementById('fac-plazo');
+            if (tipo === 'Nota de Crédito') {
+                plazoInput.value = 0;
+                plazoInput.disabled = true;
+            } else {
+                plazoInput.disabled = false;
+                actualizarPlazoSugerido();
+            }
+        }
+
+        function guardarFactura(event) {
+            event.preventDefault();
+            let fecha = document.getElementById('fac-fecha').value;
+            let prov = document.getElementById('fac-proveedor').value;
+            let tipo = document.getElementById('fac-tipo').value;
+            let plazo = parseInt(document.getElementById('fac-plazo').value) || 0;
+            let montoA = parseFloat(document.getElementById('fac-monto-a').value) || 0;
+            let montoB = parseFloat(document.getElementById('fac-monto-b').value) || 0;
+            let obs = document.getElementById('fac-obs').value || "S/D";
+
+            if (montoA === 0 && montoB === 0) {
+                showAlert("Debes ingresar un monto mayor a cero para la parte A o la parte B.", "fa-triangle-exclamation", "text-amber-400");
+                return;
+            }
+
+            let fechaVto = new Date(fecha);
+            fechaVto.setDate(fechaVto.getDate() + plazo);
+            let vencimientoStr = fechaVto.toISOString().split('T')[0];
+
+            let nuevoId = `${tipo === 'Factura' ? 'FAC' : 'NC'}-${1000 + state.facturas.length}`;
+            let factor = tipo === 'Nota de Crédito' ? -1 : 1;
+
+            state.facturas.push({
+                id: nuevoId,
+                fecha: fecha,
+                proveedor: prov,
+                tipo: tipo,
+                plazo: plazo,
+                vencimiento: vencimientoStr,
+                montoA: montoA * factor,
+                montoB: montoB * factor,
+                total: (montoA + montoB) * factor,
+                obs: obs
+            });
+
+            guardarEstado();
+            actualizarTablas();
+            actualizarDashboard();
+            
+            document.getElementById('form-factura').reset();
+            document.getElementById('fac-fecha').value = '2026-07-17';
+            document.getElementById('fac-total-calculado').innerText = "$0,00";
+            actualizarPlazoSugerido();
+            
+            showToast(`Comprobante ${nuevoId} guardado con éxito.`, "fa-circle-check", "bg-blue-600");
+        }
+
+        function confirmarEliminarFactura(id) {
+            showConfirm(`¿Seguro que deseas eliminar el comprobante ${id}? Esto anulará todos sus pagos asociados.`, () => {
+                state.pagos = state.pagos.filter(p => p.facturaRef !== id);
+                state.facturas = state.facturas.filter(f => f.id !== id);
+                guardarEstado();
+                actualizarTablas();
+                actualizarDashboard();
+                showToast("Comprobante eliminado con éxito.", "fa-trash", "bg-rose-600");
+            });
+        }
+
+        // LÓGICA DE REGISTRO DE PAGOS
+        function actualizarFacturasParaPago() {
+            const prov = document.getElementById('pago-proveedor').value;
+            const selectRef = document.getElementById('pago-factura-ref');
+            if (!selectRef) return;
+            
+            selectRef.innerHTML = `<option value="">-- Sin Imputar (Pago a Cuenta General) --</option>`;
+
+            if (!prov) return;
+
+            let facs = state.facturas.filter(f => f.proveedor === prov && f.tipo !== 'Nota de Crédito');
+            facs.forEach(f => {
+                let pagado = calcularMontoPagadoDeFactura(f.id);
+                let saldo = f.total - pagado;
+                if (saldo > 1) {
+                    selectRef.innerHTML += `<option value="${f.id}">${f.id} (${f.fecha}) - Saldo: ${formatter.format(saldo)}</option>`;
+                }
+            });
+        }
+
+        function calcularTotalPago() {
+            let a = parseFloat(document.getElementById('pago-monto-a').value) || 0;
+            let b = parseFloat(document.getElementById('pago-monto-b').value) || 0;
+            const totalCalc = document.getElementById('pago-total-calculado');
+            if (totalCalc) totalCalc.innerText = formatter.format(a + b);
+        }
+
+        function guardarPago(event) {
+            event.preventDefault();
+            let fecha = document.getElementById('pago-fecha').value;
+            let prov = document.getElementById('pago-proveedor').value;
+            let facRef = document.getElementById('pago-factura-ref').value;
+            let forma = document.getElementById('pago-forma').value;
+            let refNum = document.getElementById('pago-ref-num').value;
+            let montoA = parseFloat(document.getElementById('pago-monto-a').value) || 0;
+            let montoB = parseFloat(document.getElementById('pago-monto-b').value) || 0;
+
+            if (!prov) {
+                showAlert("Debes seleccionar un proveedor válido para imputar el pago.", "fa-user-slash", "text-rose-400");
+                return;
+            }
+
+            if (montoA === 0 && montoB === 0) {
+                showAlert("El monto del abono debe ser superior a cero.", "fa-triangle-exclamation", "text-amber-400");
+                return;
+            }
+
+            let nuevoId = `PAG-${2000 + state.pagos.length}`;
+
+            state.pagos.push({
+                id: nuevoId,
+                fecha: fecha,
+                proveedor: prov,
+                forma: forma,
+                facturaRef: facRef || "S/I",
+                montoA: montoA,
+                montoB: montoB,
+                total: montoA + montoB,
+                ref: refNum
+            });
+
+            guardarEstado();
+            actualizarTablas();
+            actualizarDashboard();
+            
+            document.getElementById('form-pago').reset();
+            document.getElementById('pago-fecha').value = '2026-07-17';
+            document.getElementById('pago-total-calculado').innerText = "$0,00";
+            document.getElementById('pago-factura-ref').innerHTML = `<option value="">-- Sin Imputar (Pago a Cuenta General) --</option>`;
+
+            showToast(`Pago ${nuevoId} registrado correctamente.`, "fa-check", "bg-emerald-600");
+        }
+
+        function confirmarEliminarPago(id) {
+            showConfirm(`¿Deseas anular el registro de abono ${id}?`, () => {
+                state.pagos = state.pagos.filter(p => p.id !== id);
+                guardarEstado();
+                actualizarTablas();
+                actualizarDashboard();
+                showToast("Pago anulado.", "fa-trash", "bg-rose-600");
+            });
+        }
+
+        // CONSOLIDADO GENERAL Y KPIS DEL DASHBOARD (2026 - 2030)
+        function actualizarDashboard() {
+            const filtroDesde = document.getElementById('filtro-desde').value;
+            const filtroHasta = document.getElementById('filtro-hasta').value;
+
+            let facturasFiltradas = state.facturas.filter(f => {
+                let mesComp = f.fecha.substring(0, 7);
+                return mesComp >= filtroDesde && mesComp <= filtroHasta;
+            });
+
+            let pagosFiltradas = state.pagos.filter(p => {
+                let mesPago = p.fecha.substring(0, 7);
+                return mesPago >= filtroDesde && mesPago <= filtroHasta;
+            });
+
+            let compradoA = facturasFiltradas.reduce((acc, f) => acc + f.montoA, 0);
+            let compradoB = facturasFiltradas.reduce((acc, f) => acc + f.montoB, 0);
+            let totalComprado = compradoA + compradoB;
+
+            let pagadoA = pagosFiltradas.reduce((acc, p) => acc + p.montoA, 0);
+            let pagadoB = pagosFiltradas.reduce((acc, p) => acc + p.montoB, 0);
+            let totalPagado = pagadoA + pagadoB;
+
+            // Deuda total acumulada a la fecha actual del sistema
+            let compTotalA = state.facturas.reduce((acc, f) => acc + f.montoA, 0);
+            let compTotalB = state.facturas.reduce((acc, f) => acc + f.montoB, 0);
+            let pagosTotalA = state.pagos.reduce((acc, p) => acc + p.montoA, 0);
+            let pagosTotalB = state.pagos.reduce((acc, p) => acc + p.montoB, 0);
+
+            let deudatransitA = compTotalA - pagosTotalA;
+            let deudatransitB = compTotalB - pagosTotalB;
+            let deudaTotal = deudatransitA + deudatransitB;
+
+            // Determinar vencidos contra el día de hoy
+            let hoy = new Date();
+            let deudavencida = 0;
+
+            state.facturas.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
+                let vto = new Date(f.vencimiento);
+                if (vto < hoy) {
+                    let pagadoDeFac = calcularMontoPagadoDeFactura(f.id);
+                    let saldoPendiente = f.total - pagadoDeFac;
+                    if (saldoPendiente > 0) {
+                        deudavencida += saldoPendiente;
+                    }
+                }
+            });
+
+            document.getElementById('kpi-comprado').innerText = formatter.format(totalComprado);
+            document.getElementById('kpi-comprado-a').innerText = formatter.format(compradoA);
+            document.getElementById('kpi-comprado-b').innerText = formatter.format(compradoB);
+
+            document.getElementById('kpi-pagado').innerText = formatter.format(totalPagado);
+            document.getElementById('kpi-pagado-a').innerText = formatter.format(pagadoA);
+            document.getElementById('kpi-pagado-b').innerText = formatter.format(pagadoB);
+
+            document.getElementById('kpi-saldo-deuda').innerText = formatter.format(deudaTotal);
+            document.getElementById('kpi-deuda-a').innerText = formatter.format(deudatransitA);
+            document.getElementById('kpi-deuda-b').innerText = formatter.format(deudatransitB);
+
+            document.getElementById('kpi-vencido').innerText = formatter.format(deudavencida);
+
+            renderGraficos(deudatransitA, deudatransitB, filtroDesde, filtroHasta);
+            renderTablaRanking(filtroDesde, filtroHasta);
+            cargarAlertasVencimiento();
+        }
+
+        // BUSCAR / FILTRAR TABLA RANKING
+        function filtrarTablaRanking() {
+            const input = document.getElementById('buscador-ranking').value.toUpperCase();
+            const tabla = document.getElementById('tabla-ranking');
+            const filas = tabla.getElementsByTagName('tr');
+
+            for (let i = 0; i < filas.length; i++) {
+                const celdaNombre = filas[i].getElementsByTagName('td')[1];
+                if (celdaNombre) {
+                    const texto = celdaNombre.textContent || celdaNombre.innerText;
+                    if (texto.toUpperCase().indexOf(input) > -1) {
+                        filas[i].style.display = "";
+                    } else {
+                        filas[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // RENDERIZADO DE TABLA DE RANKING DE COMPRAS SEGÚN EL PERÍODO
+        function renderTablaRanking(desde, hasta) {
+            const tbody = document.getElementById('tabla-ranking');
+            if (!tbody) return;
+
+            let dataProv = state.proveedores.map(p => {
+                let facturasP = state.facturas.filter(f => f.proveedor === p.nombre && f.fecha.substring(0, 7) >= desde && f.fecha.substring(0, 7) <= hasta);
+                let pagosP = state.pagos.filter(pg => pg.proveedor === p.nombre && pg.fecha.substring(0, 7) >= desde && pg.fecha.substring(0, 7) <= hasta);
+
+                let compA = facturasP.reduce((acc, f) => acc + f.montoA, 0);
+                let compB = facturasP.reduce((acc, f) => acc + f.montoB, 0);
+                let pagado = pagosP.reduce((acc, pg) => acc + pg.total, 0);
+
+                let totalC = compA + compB;
+                let deud = totalC - pagado;
+
+                return {
+                    nombre: p.nombre,
+                    a: compA,
+                    b: compB,
+                    total: totalC,
+                    pagado: pagado,
+                    deuda: deud
+                };
+            });
+
+            // Ordenamiento por mayor volumen comprado (ranking descendente)
+            dataProv.sort((a,b) => b.total - a.total);
+
+            tbody.innerHTML = dataProv.map((p, index) => {
+                return `
+                    <tr class="border-b border-slate-900 hover:bg-slate-950/40 transition duration-150">
+                        <td class="py-3 px-4 font-extrabold text-slate-500">${index + 1}</td>
+                        <td class="py-3 px-4 font-bold text-white">${p.nombre}</td>
+                        <td class="py-3 px-4 text-right text-slate-400">${formatter.format(p.a)}</td>
+                        <td class="py-3 px-4 text-right text-slate-400">${formatter.format(p.b)}</td>
+                        <td class="py-3 px-4 text-right font-semibold text-slate-200">${formatter.format(p.total)}</td>
+                        <td class="py-3 px-4 text-right text-emerald-400">${formatter.format(p.pagado)}</td>
+                        <td class="py-3 px-4 text-right font-bold text-amber-500">${formatter.format(p.deuda)}</td>
+                        <td class="py-3 px-4 text-center filtro-print-hide">
+                            <button onclick="irAFichaProveedor('${p.nombre}')" class="bg-blue-600/20 hover:bg-blue-600 border border-blue-500/30 text-blue-400 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition duration-200">
+                                <i class="fa-solid fa-folder-open mr-1"></i> Ficha
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function irAFichaProveedor(provNombre) {
+            const selectFicha = document.getElementById('select-ficha-proveedor');
+            if (selectFicha) {
+                selectFicha.value = provNombre;
+                cambiarTab('ficha');
+                cargarDiagnosticoProveedor();
+            }
+        }
+
+        // CONTROL DE ALERTAS LATERALES EN LA BARRA LATERAL
+        function cargarAlertasVencimiento() {
+            const container = document.getElementById('lista-alertas');
+            if (!container) return;
+
+            const hoy = new Date();
+            let alertas = [];
+
+            state.facturas.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
+                let vto = new Date(f.vencimiento);
+                let pagado = calcularMontoPagadoDeFactura(f.id);
+                let saldo = f.total - pagado;
+
+                if (saldo > 1) {
+                    let diffTiempo = vto - hoy;
+                    let diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
+
+                    if (diffDias <= 7) {
+                        alertas.push({
+                            facId: f.id,
+                            prov: f.proveedor,
+                            dias: diffDias,
+                            saldo: saldo
+                        });
+                    }
+                }
+            });
+
+            alertas.sort((a,b) => a.dias - b.dias);
+            document.getElementById('badge-alertas').innerText = alertas.length;
+
+            if (alertas.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No hay vencimientos de facturas en los próximos 7 días.</p>`;
+                return;
+            }
+
+            container.innerHTML = alertas.map(al => {
+                let badgeColor = "bg-rose-500/20 text-rose-400 border border-rose-800";
+                let textPlazo = al.dias < 0 ? `Vencido hace ${Math.abs(al.dias)} días` : `Vence en ${al.dias} días`;
+                
+                if (al.dias === 0) {
+                    textPlazo = "Vence hoy";
+                } else if (al.dias > 0) {
+                    badgeColor = "bg-amber-500/20 text-amber-400 border border-amber-800";
+                }
+
+                return `
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-805 flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-white text-[10px]">${al.prov}</span>
+                            <span class="text-[8px] px-1.5 py-0.5 rounded font-bold ${badgeColor}">${textPlazo}</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-400">
+                            <span>Factura: ${al.facId}</span>
+                            <span>Saldo: <strong class="text-slate-200">${formatter.format(al.saldo)}</strong></span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // DIAGNÓSTICO INDIVIDUAL (FICHA PROVEEDOR 360°)
+        function cargarDiagnosticoProveedor() {
+            const prov = document.getElementById('select-ficha-proveedor').value;
+            const divVacio = document.getElementById('diagnostico-vacio');
+            const divContenido = document.getElementById('diagnostico-contenido');
+
+            if (!prov) {
+                if (divVacio) divVacio.classList.remove('hidden');
+                if (divContenido) divContenido.classList.add('hidden');
+                return;
+            }
+
+            if (divVacio) divVacio.classList.add('hidden');
+            if (divContenido) divContenido.classList.remove('hidden');
+
+            const provObj = state.proveedores.find(p => p.nombre === prov);
+            document.getElementById('f-proveedor-titulo').innerText = prov;
+            document.getElementById('f-proveedor-plazo-txt').innerText = `${provObj.plazoPredeterminado || 30} días`;
+
+            let facturasProv = state.facturas.filter(f => f.proveedor === prov);
+            let pagosProv = state.pagos.filter(p => p.proveedor === prov);
+
+            let compradoA = facturasProv.reduce((acc, f) => acc + f.montoA, 0);
+            let compradoB = facturasProv.reduce((acc, f) => acc + f.montoB, 0);
+            let compradoTotal = compradoA + compradoB;
+
+            let pagadoA = pagosProv.reduce((acc, p) => acc + p.montoA, 0);
+            let pagadoB = pagosProv.reduce((acc, p) => acc + p.montoB, 0);
+            let pagadoTotal = pagadoA + pagadoB;
+
+            let saldoDeuda = compradoTotal - pagadoTotal;
+
+            let hoy = new Date();
+            let vencido = 0;
+            let aVencer = 0;
+
+            facturasProv.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
+                let vto = new Date(f.vencimiento);
+                let pagadoDeF = calcularMontoPagadoDeFactura(f.id);
+                let saldoF = f.total - pagadoDeF;
+
+                if (saldoF > 0) {
+                    if (vto < hoy) {
+                        vencido += saldoF;
+                    } else {
+                        aVencer += saldoF;
+                    }
+                }
+            });
+
+            document.getElementById('f-kpi-comprado').innerText = formatter.format(compradoTotal);
+            document.getElementById('f-kpi-comprado-a').innerText = formatter.format(compradoA);
+            document.getElementById('f-kpi-comprado-b').innerText = formatter.format(compradoB);
+
+            document.getElementById('f-kpi-pagado').innerText = formatter.format(pagadoTotal);
+            document.getElementById('f-kpi-pagado-a').innerText = formatter.format(pagadoA);
+            document.getElementById('f-kpi-pagado-b').innerText = formatter.format(pagadoB);
+
+            document.getElementById('f-kpi-saldo').innerText = formatter.format(saldoDeuda);
+            document.getElementById('f-kpi-vencido').innerText = formatter.format(vencido);
+            document.getElementById('f-kpi-a-vencer').innerText = formatter.format(aVencer);
+
+            let movimientos = [];
+
+            facturasProv.forEach(f => {
+                movimientos.push({
+                    fecha: f.fecha,
+                    concepto: f.tipo === 'Saldo Inicial (Ene-Jun)' ? "Consolidación Ene-Jun" : f.tipo,
+                    ref: f.id,
+                    montoA: f.montoA,
+                    montoB: f.montoB,
+                    total: f.total,
+                    vencimiento: f.vencimiento,
+                    tipoTrans: 'factura'
+                });
+            });
+
+            pagosProv.forEach(p => {
+                movimientos.push({
+                    fecha: p.fecha,
+                    concepto: `Pago (${p.forma})`,
+                    ref: p.id,
+                    montoA: -p.montoA,
+                    montoB: -p.montoB,
+                    total: -p.total,
+                    vencimiento: '-',
+                    tipoTrans: 'pago'
+                });
+            });
+
+            movimientos.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+            const tbody = document.getElementById('f-tabla-cronologia');
+            if (tbody) {
+                if (movimientos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-500">No se registran transacciones para este proveedor.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = movimientos.map(m => {
+                    let rowStyle = "";
+                    let badgeStyle = "bg-slate-900 text-slate-300";
+                    
+                    if (m.tipoTrans === 'pago') {
+                        rowStyle = "bg-emerald-950/20";
+                        badgeStyle = "bg-emerald-950 text-emerald-400 border border-emerald-800";
+                    } else if (m.concepto.includes('Nota de Crédito')) {
+                        rowStyle = "bg-purple-950/20";
+                        badgeStyle = "bg-purple-950 text-purple-400 border border-purple-800";
+                    }
+
+                    return `
+                        <tr class="${rowStyle} border-b border-slate-900">
+                            <td class="py-3 px-4 font-semibold text-slate-400">${m.fecha}</td>
+                            <td class="py-3 px-4 font-bold text-white">${m.concepto}</td>
+                            <td class="py-3 px-4 text-slate-400">${m.ref}</td>
+                            <td class="py-3 px-4 text-right text-slate-400">${formatter.format(m.montoA)}</td>
+                            <td class="py-3 px-4 text-right text-slate-400">${formatter.format(m.montoB)}</td>
+                            <td class="py-3 px-4 text-right font-bold text-white">${formatter.format(m.total)}</td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeStyle}">${m.tipoTrans === 'pago' ? 'Completado' : 'Vence: ' + m.vencimiento}</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // DETALLE DE GRÁFICOS (CHART.JS) - AUTOADAPTABLE AL PERÍODO SELECCIONADO
+        function renderGraficos(deudaA, deudaB, desde, hasta) {
+            const canvasPie = document.getElementById('chartPieAB');
+            if (canvasPie) {
+                const ctxPie = canvasPie.getContext('2d');
+                if (chartPie) {
+                    chartPie.destroy();
+                }
+
+                chartPie = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Parte A', 'Parte B'],
+                        datasets: [{
+                            data: [Math.max(0, deudaA), Math.max(0, deudaB)],
+                            backgroundColor: ['#2563eb', '#818cf8'],
+                            borderColor: '#0f172a',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            const canvasEvo = document.getElementById('chartEvolucion');
+            if (canvasEvo) {
+                const ctxEvo = canvasEvo.getContext('2d');
+                if (chartEvo) {
+                    chartEvo.destroy();
+                }
+
+                // Generamos los meses en el rango
+                let listaMeses = [];
+                let [anioD, mesD] = desde.split('-').map(Number);
+                let [anioH, mesH] = hasta.split('-').map(Number);
+                
+                let actAnio = anioD;
+                let actMes = mesD;
+                
+                while (actAnio < anioH || (actAnio === anioH && actMes <= mesH)) {
+                    let strMes = actMes < 10 ? `0${actMes}` : `${actMes}`;
+                    listaMeses.push(`${actAnio}-${strMes}`);
+                    
+                    actMes++;
+                    if (actMes > 12) {
+                        actMes = 1;
+                        actAnio++;
+                    }
+                }
+
+                // Agrupamos compras A, B y pagos por mes
+                let comprasMensualA = Array(listaMeses.length).fill(0);
+                let comprasMensualB = Array(listaMeses.length).fill(0);
+                let pagosMensual = Array(listaMeses.length).fill(0);
+
+                state.facturas.forEach(f => {
+                    let mesF = f.fecha.substring(0, 7);
+                    let idx = listaMeses.indexOf(mesF);
+                    if (idx !== -1) {
+                        comprasMensualA[idx] += f.montoA;
+                        comprasMensualB[idx] += f.montoB;
+                    }
+                });
+
+                state.pagos.forEach(p => {
+                    let mesP = p.fecha.substring(0, 7);
+                    let idx = listaMeses.indexOf(mesP);
+                    if (idx !== -1) {
+                        pagosMensual[idx] += p.total;
+                    }
+                });
+
+                // Mapeamos etiquetas legibles, ej: "Jul 26", "Ene 27"
+                const nombresMesesCortos = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                let labelsEvo = listaMeses.map(m => {
+                    let [anio, mes] = m.split('-');
+                    return `${nombresMesesCortos[parseInt(mes) - 1]} ${anio.substring(2)}`;
+                });
+
+                chartEvo = new Chart(ctxEvo, {
+                    type: 'bar',
+                    data: {
+                        labels: labelsEvo,
+                        datasets: [
+                            {
+                                label: 'Parte A',
+                                data: comprasMensualA,
+                                backgroundColor: '#2563eb',
+                                stack: 'compras'
+                            },
+                            {
+                                label: 'Parte B',
+                                data: comprasMensualB,
+                                backgroundColor: '#818cf8',
+                                stack: 'compras'
+                            },
+                            {
+                                label: 'Pagos Realizados',
+                                data: pagosMensual,
+                                backgroundColor: '#10b981',
+                                type: 'line',
+                                borderColor: '#10b981',
+                                borderWidth: 2.5,
+                                fill: false,
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { color: '#1e293b' },
+                                ticks: { color: '#94a3b8', font: { size: 10 } }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: '#1e293b' },
+                                ticks: { color: '#94a3b8', font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#f8fafc', font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ASISTENTE DE EXPORTACIÓN SELECTIVA A PDF / IMPRESIÓN
+        function toggleModalPDF(show) {
+            const modal = document.getElementById('modal-export-pdf');
+            const content = document.getElementById('modal-export-pdf-content');
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function abrirModalPDF() {
+            toggleModalPDF(true);
+        }
+
+        function ejecutarExportacionPDF() {
+            const radios = document.getElementsByName('seccion-pdf');
+            let seccionSeleccionada = 'dashboard';
+            
+            for (const r of radios) {
+                if (r.checked) {
+                    seccionSeleccionada = r.value;
+                    break;
+                }
+            }
+
+            // Cerrar el modal del asistente de PDF
+            toggleModalPDF(false);
+
+            // Obtener el ID del contenedor que queremos imprimir
+            let idTarget = '';
+            if (seccionSeleccionada === 'dashboard') {
+                idTarget = 'tab-dashboard';
+            } else if (seccionSeleccionada === 'ficha') {
+                idTarget = 'tab-ficha';
+                // Si la ficha está oculta por no haber seleccionado un proveedor, avisar al usuario
+                const provVal = document.getElementById('select-ficha-proveedor').value;
+                if (!provVal) {
+                    showAlert("Primero debes seleccionar un proveedor en la pestaña de Diagnóstico para poder imprimir su ficha.", "fa-user-slash", "text-rose-400");
+                    return;
+                }
+            } else if (seccionSeleccionada === 'facturas') {
+                idTarget = 'tab-facturas';
+            } else if (seccionSeleccionada === 'pagos') {
+                idTarget = 'tab-pagos';
+            }
+
+            const elementToPrint = document.getElementById(idTarget);
+            if (!elementToPrint) return;
+
+            // Marcamos la sección seleccionada y activamos el layout de impresión
+            elementToPrint.classList.add('print-target');
+            document.body.classList.add('printing-active');
+
+            // Pequeño timeout para permitir que los gráficos se adapten al layout de página
+            setTimeout(() => {
+                window.print();
+                
+                // Limpiamos los estilos temporales post-impresión
+                elementToPrint.classList.remove('print-target');
+                document.body.classList.remove('printing-active');
+                showToast("Reporte PDF generado correctamente.", "fa-file-pdf", "bg-emerald-600");
+            }, 500);
+        }
+
+        // RESPALDO DE SEGURIDAD EN FORMATO JSON
+        function exportarDatos() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `cuenta_corriente_proveedores_backup_${new Date().toISOString().substring(0,10)}.json`);
+            dlAnchorElem.click();
+            showToast("Respaldo JSON generado correctamente.", "fa-file-arrow-down", "bg-emerald-600");
+        }
+
+        // NOTIFICACIONES FLOTANTES (TOAST)
+        function showToast(msg, icon, bgColor) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMsg = document.getElementById('toast-msg');
+
+            if (toast && toastIcon && toastMsg) {
+                toastMsg.innerText = msg;
+                toastIcon.className = `fa-solid ${icon} text-lg`;
+                toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-0 opacity-100 z-50 flex items-center gap-3 ${bgColor}`;
+
+                setTimeout(() => {
+                    toast.className = "fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-3";
+                }, 3500);
+            }
+        }
+    </script>
+</body>
+</html>
