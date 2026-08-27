@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Proveedores - Tablero Corporativo MS</title>
+    <title>Control de Proveedores - Dashboard Corporativo Premium</title>
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para iconos de alta calidad -->
@@ -806,7 +806,7 @@
 };
 
         // Soporte tanto para Canvas (variables inyectadas) como para tu código local/Github
-        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : miFirebaseConfig;
+        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
         
         // Inicializar Firebase
         const app = initializeApp(finalConfig);
@@ -1233,7 +1233,7 @@
 
             showConfirm("¿Estás seguro de que deseas cargar este respaldo? Esta acción sobrescribirá todos los datos actuales en la nube y no se puede deshacer.", () => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     try {
                         const contenido = e.target.result;
                         const nuevoEstado = JSON.parse(contenido);
@@ -1241,10 +1241,19 @@
                         // Validación básica de la estructura del JSON
                         if (nuevoEstado && Array.isArray(nuevoEstado.proveedores) && Array.isArray(nuevoEstado.facturas) && Array.isArray(nuevoEstado.pagos)) {
                             state = nuevoEstado;
-                            guardarEstado(); // Sincronizamos el nuevo estado con Firebase
+                            
+                            // FORZAMOS EL GUARDADO EN FIREBASE INMEDIATAMENTE Y ESPERAMOS QUE TERMINE
+                            if (docRef) {
+                                await setDoc(docRef, state);
+                            } else {
+                                console.warn("No hay conexión activa con Firebase, guardando solo en memoria temporal.");
+                            }
+
+                            // ACTUALIZAMOS LA INTERFAZ
                             actualizarSelectores();
                             actualizarTablas();
                             actualizarDashboard();
+                            
                             showToast("Respaldo cargado y sincronizado con éxito.", "fa-upload", "bg-emerald-600");
                         } else {
                             showAlert("El archivo JSON no tiene el formato correcto para este sistema.", "fa-triangle-exclamation", "text-rose-400");
