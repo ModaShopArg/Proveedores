@@ -115,9 +115,11 @@
             <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 hover:text-white px-3 py-2 rounded-lg text-xs transition duration-200">
                 <i class="fa-solid fa-download mr-1"></i> Respaldar JSON
             </button>
-            <button onclick="confirmarReinicio()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800 text-rose-300 px-3 py-2 rounded-lg text-xs transition duration-200">
-                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Reiniciar Demo
+            <button onclick="document.getElementById('input-cargar-json').click()" class="bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800 text-emerald-300 px-3 py-2 rounded-lg text-xs transition duration-200">
+                <i class="fa-solid fa-upload mr-1"></i> Cargar Respaldo
             </button>
+            <!-- Input oculto para cargar archivo -->
+            <input type="file" id="input-cargar-json" accept=".json" class="hidden" onchange="cargarRespaldoJSON(event)">
         </div>
     </header>
 
@@ -592,7 +594,7 @@
                             <p class="text-xs text-slate-400">Modifica directamente los totales consolidados de la primera mitad del año sin tener que cargar los comprobantes individuales.</p>
                         </div>
                         <span class="text-xs bg-indigo-950/60 border border-indigo-800 text-indigo-300 px-3 py-1.5 rounded-lg font-semibold filtro-print-hide">
-                            <i class="fa-solid fa-cloud mr-1"></i> Guardado Automático por Fila
+                            <i class="fa-solid fa-cloud mr-1"></i> Guardado Automático en la Nube
                         </span>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
@@ -786,8 +788,34 @@
         <span id="toast-msg" class="text-xs font-semibold">Mensaje de notificación</span>
     </div>
 
-    <!-- LOGICA DE CONTROL EN JAVASCRIPT -->
-    <script>
+    <!-- LOGICA DE CONTROL EN JAVASCRIPT CON FIREBASE -->
+    <script type="module">
+        // Importar módulos de Firebase v11.6.1
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyC7c0K8Alxlj9EGlZo98IEdoFQpuxSkWWg",
+  authDomain: "tablero-proveedores-97589.firebaseapp.com",
+  projectId: "tablero-proveedores-97589",
+  storageBucket: "tablero-proveedores-97589.firebasestorage.app",
+  messagingSenderId: "297535359638",
+  appId: "1:297535359638:web:9d1e63c50a6474f66a10b7"
+};
+
+        // Soporte tanto para Canvas (variables inyectadas) como para tu código local/Github
+        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : miFirebaseConfig;
+        
+        // Inicializar Firebase
+        const app = initializeApp(finalConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let userId = null;
+        let docRef = null;
+
         const PROVEEDORES_SEMILLA = [
             { nombre: "TARGET", a: 6371778.36, b: 76606774.00, pagado: 29047443.33, plazo: 30 },
             { nombre: "CITY GIRL", a: 0.00, b: 22815485.77, pagado: 7985420.00, plazo: 30 },
@@ -1053,35 +1081,81 @@
             showToast(`Proveedor ${nombreInput} creado correctamente.`, "fa-user-check", "bg-emerald-600");
         }
 
-        // INICIALIZACIÓN DE LA APLICACIÓN
+        // =======================================================
+        // INTEGRACIÓN DE FIREBASE Y CARGA DE RESPALDOS
+        // =======================================================
         window.addEventListener('DOMContentLoaded', () => {
             inicializarSelectoresFechas();
-            inicializarApp();
-        });
-
-        function inicializarApp() {
-            const stored = localStorage.getItem('supplier_app_state');
-            if (stored) {
-                try {
-                    state = JSON.parse(stored);
-                } catch(e) {
-                    console.error("Error al cargar localStorage, reiniciando.", e);
-                    cargarSemillaPorDefecto();
-                }
-            } else {
-                cargarSemillaPorDefecto();
-            }
-
             // Asignación de fechas de referencia para cargas rápidas
             const inputFechaFac = document.getElementById('fac-fecha');
             const inputFechaPago = document.getElementById('pago-fecha');
-            
             if(inputFechaFac) inputFechaFac.value = '2026-07-17';
             if(inputFechaPago) inputFechaPago.value = '2026-07-17';
+            
+            inicializarApp();
+        });
 
-            actualizarSelectores();
-            actualizarTablas();
-            actualizarDashboard();
+        async function inicializarApp() {
+            showToast("Conectando a Firebase...", "fa-cloud", "bg-blue-600");
+            
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error de autenticación Firebase:", error);
+                showToast("Fallo al autenticar", "fa-triangle-exclamation", "bg-rose-600");
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    
+                    // Definición dinámica de la ruta
+                    if (typeof __app_id !== 'undefined') {
+                        docRef = doc(db, 'artifacts', __app_id, 'users', userId, 'dashboard', 'main_state');
+                    } else {
+                        docRef = doc(db, 'datos_dashboard', 'estado_principal'); 
+                    }
+                    
+                    iniciarSincronizacion();
+                }
+            });
+        }
+
+        let isFirstLoad = true;
+        function iniciarSincronizacion() {
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    state = docSnap.data();
+                    if (isFirstLoad) {
+                        showToast("Sincronización exitosa con la nube.", "fa-cloud-check", "bg-emerald-600");
+                        isFirstLoad = false;
+                    }
+                } else {
+                    console.log("No se encontraron datos en la nube. Cargando semilla por defecto...");
+                    cargarSemillaPorDefecto();
+                }
+                
+                actualizarSelectores();
+                actualizarTablas();
+                actualizarDashboard();
+            }, (error) => {
+                console.error("Error en onSnapshot de Firebase: ", error);
+                showToast("Error de sincronización con la nube", "fa-xmark", "bg-rose-600");
+            });
+        }
+
+        async function guardarEstado() {
+            if (!docRef) return;
+            try {
+                await setDoc(docRef, state);
+            } catch (e) {
+                console.error("Error guardando en Firebase:", e);
+                showToast("No se pudo guardar en la nube.", "fa-triangle-exclamation", "bg-rose-600");
+            }
         }
 
         function cargarSemillaPorDefecto() {
@@ -1152,16 +1226,38 @@
             guardarEstado();
         }
 
-        function guardarEstado() {
-            localStorage.setItem('supplier_app_state', JSON.stringify(state));
-        }
+        // FUNCIÓN PARA CARGAR RESPALDO JSON
+        function cargarRespaldoJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function confirmarReinicio() {
-            showConfirm("¿Estás completamente seguro de que deseas restablecer los datos de demostración? Se borrará todo tu progreso.", () => {
-                cargarSemillaPorDefecto();
-                inicializarApp();
-                showToast("Datos restablecidos con éxito.", "fa-arrow-rotate-left", "bg-indigo-600");
+            showConfirm("¿Estás seguro de que deseas cargar este respaldo? Esta acción sobrescribirá todos los datos actuales en la nube y no se puede deshacer.", () => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const contenido = e.target.result;
+                        const nuevoEstado = JSON.parse(contenido);
+                        
+                        // Validación básica de la estructura del JSON
+                        if (nuevoEstado && Array.isArray(nuevoEstado.proveedores) && Array.isArray(nuevoEstado.facturas) && Array.isArray(nuevoEstado.pagos)) {
+                            state = nuevoEstado;
+                            guardarEstado(); // Sincronizamos el nuevo estado con Firebase
+                            actualizarSelectores();
+                            actualizarTablas();
+                            actualizarDashboard();
+                            showToast("Respaldo cargado y sincronizado con éxito.", "fa-upload", "bg-emerald-600");
+                        } else {
+                            showAlert("El archivo JSON no tiene el formato correcto para este sistema.", "fa-triangle-exclamation", "text-rose-400");
+                        }
+                    } catch (error) {
+                        console.error("Error al procesar JSON:", error);
+                        showAlert("Hubo un error al leer el archivo. Asegúrate de que sea un JSON válido.", "fa-xmark", "text-rose-500");
+                    }
+                };
+                reader.readAsText(file);
             });
+            // Reseteamos el input para que permita cargar el mismo archivo de nuevo si es necesario
+            event.target.value = '';
         }
 
         // SISTEMA DE NAVEGACIÓN ENTRE TABS
@@ -1387,9 +1483,7 @@
             }
 
             guardarEstado();
-            actualizarTablas();
-            actualizarDashboard();
-            showToast(`Saldo histórico de ${provNombre} actualizado.`, "fa-check", "bg-emerald-600");
+            showToast(`Saldo histórico de ${provNombre} actualizado en la nube.`, "fa-check", "bg-emerald-600");
         }
 
         function calcularMontoPagadoDeFactura(facturaId) {
@@ -1454,8 +1548,6 @@
             });
 
             guardarEstado();
-            actualizarTablas();
-            actualizarDashboard();
             
             document.getElementById('form-factura').reset();
             document.getElementById('fac-fecha').value = '2026-07-17';
@@ -1470,8 +1562,6 @@
                 state.pagos = state.pagos.filter(p => p.facturaRef !== id);
                 state.facturas = state.facturas.filter(f => f.id !== id);
                 guardarEstado();
-                actualizarTablas();
-                actualizarDashboard();
                 showToast("Comprobante eliminado con éxito.", "fa-trash", "bg-rose-600");
             });
         }
@@ -1538,8 +1628,6 @@
             });
 
             guardarEstado();
-            actualizarTablas();
-            actualizarDashboard();
             
             document.getElementById('form-pago').reset();
             document.getElementById('pago-fecha').value = '2026-07-17';
@@ -1553,8 +1641,6 @@
             showConfirm(`¿Deseas anular el registro de abono ${id}?`, () => {
                 state.pagos = state.pagos.filter(p => p.id !== id);
                 guardarEstado();
-                actualizarTablas();
-                actualizarDashboard();
                 showToast("Pago anulado.", "fa-trash", "bg-rose-600");
             });
         }
@@ -2134,6 +2220,22 @@
                 }, 3500);
             }
         }
+
+        // =======================================================
+        // EXPORTAR FUNCIONES AL OBJETO WINDOW 
+        // (Requerido al usar `<script type="module">` con HTML inline)
+        // =======================================================
+        Object.assign(window, {
+            abrirModalPDF, exportarDatos, cambiarTab, cargarRespaldoJSON,
+            toggleModalProveedor, actualizarDashboard, filtrarTablaRanking, 
+            cargarDiagnosticoProveedor, abrirModalEditarPlazo, toggleModalEditarPlazo, 
+            guardarNuevoPlazo, guardarFactura, actualizarPlazoSugerido, 
+            verificarTipoComprobante, calcularTotalFactura, confirmarEliminarFactura, 
+            guardarPago, actualizarFacturasParaPago, calcularTotalPago, 
+            confirmarEliminarPago, guardarFilaHistorica, irAFichaProveedor, 
+            ejecutarExportacionPDF, toggleModalPDF, agregarProveedor, 
+            closeConfirm, closeAlert
+        });
     </script>
 </body>
 </html>
