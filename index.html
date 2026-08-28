@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Proveedores - Dashboard Corporativo Premium</title>
+    <title>Control de Proveedores - Tablero Corporativo MS</title>
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para iconos de alta calidad -->
@@ -109,17 +109,19 @@
             </div>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
-            <button onclick="abrirModalPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-700 px-3 py-2 rounded-lg text-xs font-semibold transition duration-200 flex items-center gap-1.5">
+            <button onclick="window.abrirModalPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-700 px-3 py-2 rounded-lg text-xs font-semibold transition duration-200 flex items-center gap-1.5">
                 <i class="fa-solid fa-file-pdf text-sm"></i> Exportar PDF
             </button>
-            <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 hover:text-white px-3 py-2 rounded-lg text-xs transition duration-200">
+            <button onclick="window.exportarDatos()" class="bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 hover:text-white px-3 py-2 rounded-lg text-xs transition duration-200">
                 <i class="fa-solid fa-download mr-1"></i> Respaldar JSON
             </button>
-            <button onclick="document.getElementById('input-cargar-json').click()" class="bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800 text-emerald-300 px-3 py-2 rounded-lg text-xs transition duration-200">
+            <button onclick="document.getElementById('file-import-json').click()" class="bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800 text-emerald-300 px-3 py-2 rounded-lg text-xs transition duration-200">
                 <i class="fa-solid fa-upload mr-1"></i> Cargar Respaldo
             </button>
-            <!-- Input oculto para cargar archivo -->
-            <input type="file" id="input-cargar-json" accept=".json" class="hidden" onchange="cargarRespaldoJSON(event)">
+            <input type="file" id="file-import-json" accept=".json" onchange="window.importarDatos(event)" class="hidden">
+            <button onclick="window.confirmarCerrarCiclo()" class="bg-amber-600 hover:bg-amber-500 border border-amber-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition duration-200 shadow-lg shadow-amber-600/20">
+                <i class="fa-solid fa-power-off mr-1"></i> Cerrar Ciclo
+            </button>
         </div>
     </header>
 
@@ -130,30 +132,34 @@
         <aside class="w-72 bg-slate-950 border-r border-slate-850 p-4 hidden lg:flex flex-col gap-3 shrink-0">
             <p class="text-slate-500 uppercase tracking-widest text-[10px] font-bold px-3">Secciones</p>
             <nav class="flex flex-col gap-1.5">
-                <button onclick="cambiarTab('dashboard')" id="btn-tab-dashboard" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10">
+                <button onclick="window.cambiarTab('dashboard')" id="btn-tab-dashboard" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-chart-pie text-base"></i> Resumen de Cuenta</span>
                     <i class="fa-solid fa-angle-right text-xs"></i>
                 </button>
-                <button onclick="cambiarTab('ficha')" id="btn-tab-ficha" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                <button onclick="window.cambiarTab('ficha')" id="btn-tab-ficha" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-folder-open text-base"></i> Diagnóstico por Proveedor</span>
                     <i class="fa-solid fa-angle-right text-xs"></i>
                 </button>
-                <button onclick="cambiarTab('facturas')" id="btn-tab-facturas" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                <button onclick="window.cambiarTab('facturas')" id="btn-tab-facturas" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-invoice-dollar text-base"></i> Ingreso Comprobantes</span>
                     <i class="fa-solid fa-angle-right text-xs"></i>
                 </button>
-                <button onclick="cambiarTab('pagos')" id="btn-tab-pagos" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                <button onclick="window.cambiarTab('pagos')" id="btn-tab-pagos" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-wallet text-base"></i> Registrar Pagos / NC</span>
                     <i class="fa-solid fa-angle-right text-xs"></i>
                 </button>
-                <button onclick="cambiarTab('historico')" id="btn-tab-historico" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                <button onclick="window.cambiarTab('historico')" id="btn-tab-historico" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-database text-base"></i> Carga Histórica Ene-Jun</span>
+                    <i class="fa-solid fa-angle-right text-xs"></i>
+                </button>
+                <button onclick="window.cambiarTab('ciclos')" id="btn-tab-ciclos" class="tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100 mt-2 border border-slate-800 bg-slate-950">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-clock-rotate-left text-amber-500 text-base"></i> Historial de Ciclos</span>
                     <i class="fa-solid fa-angle-right text-xs"></i>
                 </button>
             </nav>
 
             <div class="px-2 mt-2">
-                <button onclick="toggleModalProveedor(true)" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                <button onclick="window.toggleModalProveedor(true)" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-user-plus text-sm"></i> Nuevo Proveedor
                 </button>
             </div>
@@ -184,13 +190,13 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <div class="flex items-center gap-2">
                             <label class="text-xs text-slate-400 font-semibold">Desde:</label>
-                            <select id="filtro-desde" onchange="actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
+                            <select id="filtro-desde" onchange="window.actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
                                 <!-- Poblado dinámicamente -->
                             </select>
                         </div>
                         <div class="flex items-center gap-2">
                             <label class="text-xs text-slate-400 font-semibold">Hasta:</label>
-                            <select id="filtro-hasta" onchange="actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
+                            <select id="filtro-hasta" onchange="window.actualizarDashboard()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-blue-500">
                                 <!-- Poblado dinámicamente -->
                             </select>
                         </div>
@@ -296,7 +302,7 @@
                             <p class="text-xs text-slate-400">Ordenado por volumen de compra en el período consolidado.</p>
                         </div>
                         <div class="relative w-full md:w-72 filtro-print-hide">
-                            <input type="text" id="buscador-ranking" onkeyup="filtrarTablaRanking()" placeholder="Buscar proveedor..." class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" id="buscador-ranking" onkeyup="window.filtrarTablaRanking()" placeholder="Buscar proveedor..." class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-blue-500">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-xs"></i>
                         </div>
                     </div>
@@ -306,8 +312,8 @@
                                 <tr class="border-b border-slate-800 text-slate-400">
                                     <th class="py-3 px-4 font-bold">#</th>
                                     <th class="py-3 px-4 font-bold">Proveedor</th>
-                                    <th class="py-3 px-4 font-bold text-right">FAC Parte A</th>
-                                    <th class="py-3 px-4 font-bold text-right">Parte B</th>
+                                    <th class="py-3 px-4 font-bold text-right">Saldo Parte A</th>
+                                    <th class="py-3 px-4 font-bold text-right">Saldo Parte B</th>
                                     <th class="py-3 px-4 font-bold text-right">Total Comprado</th>
                                     <th class="py-3 px-4 font-bold text-right">Total Pagado</th>
                                     <th class="py-3 px-4 font-bold text-right">Saldo Deuda</th>
@@ -330,7 +336,7 @@
                         <p class="text-xs text-slate-400">Selecciona un proveedor para auditar su estado contable, plazos e historial cruzado.</p>
                     </div>
                     <div class="w-full md:w-80">
-                        <select id="select-ficha-proveedor" onchange="cargarDiagnosticoProveedor()" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                        <select id="select-ficha-proveedor" onchange="window.cargarDiagnosticoProveedor()" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3 py-2.5 rounded-lg focus:outline-none focus:border-blue-500">
                             <!-- Se carga dinámicamente -->
                         </select>
                     </div>
@@ -353,7 +359,7 @@
                                 <span class="text-slate-400"><i class="fa-solid fa-clock text-blue-400"></i> Plazo Actual:</span>
                                 <strong id="f-proveedor-plazo-txt" class="text-white">30 días</strong>
                             </div>
-                            <button onclick="abrirModalEditarPlazo()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition duration-200 flex items-center gap-1.5 filtro-print-hide">
+                            <button onclick="window.abrirModalEditarPlazo()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition duration-200 flex items-center gap-1.5 filtro-print-hide">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar Plazo
                             </button>
                         </div>
@@ -422,20 +428,20 @@
                             <h3 class="text-xs font-bold text-white uppercase tracking-wider">Cargar Comprobante</h3>
                         </div>
 
-                        <form id="form-factura" onsubmit="guardarFactura(event)" class="flex flex-col gap-4 text-xs">
+                        <form id="form-factura" onsubmit="window.guardarFactura(event)" class="flex flex-col gap-4 text-xs">
                             <div>
                                 <label class="block text-slate-400 font-semibold mb-1">Fecha Emisión</label>
                                 <input type="date" id="fac-fecha" min="2026-01-01" max="2030-12-31" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-slate-400 font-semibold mb-1">Proveedor</label>
-                                <select id="fac-proveedor" required onchange="actualizarPlazoSugerido()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                <select id="fac-proveedor" required onchange="window.actualizarPlazoSugerido()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
                                     <!-- Cargado dinámicamente -->
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-slate-400 font-semibold mb-1">Tipo de Comprobante</label>
-                                <select id="fac-tipo" onchange="verificarTipoComprobante()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                <select id="fac-tipo" onchange="window.verificarTipoComprobante()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
                                     <option value="Factura">Factura de Compra (+ Deuda)</option>
                                     <option value="Nota de Crédito">Nota de Crédito (- Deuda)</option>
                                 </select>
@@ -447,11 +453,11 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-slate-400 font-semibold mb-1">Monto Parte A</label>
-                                    <input type="number" id="fac-monto-a" step="0.01" min="0" value="0.00" onkeyup="calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                    <input type="number" id="fac-monto-a" step="0.01" min="0" value="0.00" onkeyup="window.calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
                                 </div>
                                 <div>
                                     <label class="block text-slate-400 font-semibold mb-1">Monto Parte B</label>
-                                    <input type="number" id="fac-monto-b" step="0.01" min="0" value="0.00" onkeyup="calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                    <input type="number" id="fac-monto-b" step="0.01" min="0" value="0.00" onkeyup="window.calcularTotalFactura()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
                                 </div>
                             </div>
                             <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center my-1">
@@ -507,14 +513,14 @@
                             <h3 class="text-xs font-bold text-white uppercase tracking-wider">Cargar Pago / Abono</h3>
                         </div>
 
-                        <form id="form-pago" onsubmit="guardarPago(event)" class="flex flex-col gap-4 text-xs">
+                        <form id="form-pago" onsubmit="window.guardarPago(event)" class="flex flex-col gap-4 text-xs">
                             <div>
                                 <label class="block text-slate-400 font-semibold mb-1">Fecha de Operación</label>
                                 <input type="date" id="pago-fecha" min="2026-01-01" max="2030-12-31" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-slate-400 font-semibold mb-1">Proveedor</label>
-                                <select id="pago-proveedor" onchange="actualizarFacturasParaPago()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
+                                <select id="pago-proveedor" onchange="window.actualizarFacturasParaPago()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
                                     <!-- Cargado dinámicamente -->
                                 </select>
                             </div>
@@ -541,11 +547,11 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-slate-400 font-semibold mb-1">Abono Parte A</label>
-                                    <input type="number" id="pago-monto-a" step="0.01" min="0" value="0.00" onkeyup="calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                    <input type="number" id="pago-monto-a" step="0.01" min="0" value="0.00" onkeyup="window.calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
                                 </div>
                                 <div>
                                     <label class="block text-slate-400 font-semibold mb-1">Abono Parte B</label>
-                                    <input type="number" id="pago-monto-b" step="0.01" min="0" value="0.00" onkeyup="calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
+                                    <input type="number" id="pago-monto-b" step="0.01" min="0" value="0.00" onkeyup="window.calcularTotalPago()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 text-right">
                                 </div>
                             </div>
                             <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center my-1">
@@ -590,8 +596,8 @@
                 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
                         <div>
-                            <h2 class="text-sm font-bold text-white">Acumulado del Primer Semestre (Enero - Junio 2026)</h2>
-                            <p class="text-xs text-slate-400">Modifica directamente los totales consolidados de la primera mitad del año sin tener que cargar los comprobantes individuales.</p>
+                            <h2 class="text-sm font-bold text-white">Acumulado Histórico (Saldo Inicial)</h2>
+                            <p class="text-xs text-slate-400">Modifica directamente los totales consolidados sin tener que cargar los comprobantes individuales.</p>
                         </div>
                         <span class="text-xs bg-indigo-950/60 border border-indigo-800 text-indigo-300 px-3 py-1.5 rounded-lg font-semibold filtro-print-hide">
                             <i class="fa-solid fa-cloud mr-1"></i> Guardado Automático en la Nube
@@ -604,7 +610,7 @@
                                     <th class="py-3 px-4 font-bold">Razón Social o Proveedor</th>
                                     <th class="py-3 px-4 font-bold text-center">Compras Totales Parte A</th>
                                     <th class="py-3 px-4 font-bold text-center">Compras Totales Parte B</th>
-                                    <th class="py-3 px-4 font-bold text-center">Pagado Total Ene-Jun</th>
+                                    <th class="py-3 px-4 font-bold text-center">Pagado Total Acumulado</th>
                                     <th class="py-3 px-4 font-bold text-center">Saldo Arrastrado</th>
                                     <th class="py-3 px-4 font-bold text-center filtro-print-hide">Acciones</th>
                                 </tr>
@@ -613,6 +619,20 @@
                                 <!-- Se carga dinámicamente -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTENIDO TAB: CICLOS HISTÓRICOS -->
+            <section id="tab-ciclos" class="tab-content flex flex-col gap-6 hidden">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <h2 class="text-sm font-bold text-white">Historial de Ciclos Cerrados</h2>
+                        <p class="text-xs text-slate-400">Aquí se guardan los resúmenes financieros de los ciclos anteriores cada vez que se utiliza la función "Cerrar Ciclo".</p>
+                    </div>
+                    
+                    <div id="lista-ciclos" class="flex flex-col gap-4">
+                        <!-- Se carga dinámicamente -->
                     </div>
                 </div>
             </section>
@@ -630,12 +650,12 @@
                     </div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Registrar Nuevo Proveedor</h3>
                 </div>
-                <button onclick="toggleModalProveedor(false)" class="text-slate-400 hover:text-slate-200 transition">
+                <button onclick="window.toggleModalProveedor(false)" class="text-slate-400 hover:text-slate-200 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             
-            <form id="form-nuevo-proveedor" onsubmit="agregarProveedor(event)" class="flex flex-col gap-4 text-xs">
+            <form id="form-nuevo-proveedor" onsubmit="window.agregarProveedor(event)" class="flex flex-col gap-4 text-xs">
                 <div>
                     <label class="block text-slate-400 font-semibold mb-1.5">Nombre o Razón Social</label>
                     <input type="text" id="prov-nombre" required placeholder="Ej: IMPORTADORA TEXTIL S.A." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 text-xs">
@@ -646,7 +666,7 @@
                     <p class="text-[10px] text-slate-500 mt-1">Plazo base para proyecciones de vencimientos en facturas.</p>
                 </div>
                 <div class="flex justify-end gap-3 mt-2">
-                    <button type="button" onclick="toggleModalProveedor(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
+                    <button type="button" onclick="window.toggleModalProveedor(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
                         Cancelar
                     </button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20">
@@ -667,12 +687,12 @@
                     </div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Editar Plazo de Pago</h3>
                 </div>
-                <button onclick="toggleModalEditarPlazo(false)" class="text-slate-400 hover:text-slate-200 transition">
+                <button onclick="window.toggleModalEditarPlazo(false)" class="text-slate-400 hover:text-slate-200 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             
-            <form id="form-editar-plazo" onsubmit="guardarNuevoPlazo(event)" class="flex flex-col gap-4 text-xs">
+            <form id="form-editar-plazo" onsubmit="window.guardarNuevoPlazo(event)" class="flex flex-col gap-4 text-xs">
                 <div>
                     <label class="block text-slate-400 font-semibold mb-1.5">Proveedor Seleccionado</label>
                     <input type="text" id="edit-prov-nombre" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-500 text-xs font-bold outline-none">
@@ -683,7 +703,7 @@
                     <p class="text-[10px] text-slate-500 mt-1">Este nuevo plazo se aplicará a los futuros comprobantes cargados.</p>
                 </div>
                 <div class="flex justify-end gap-3 mt-2">
-                    <button type="button" onclick="toggleModalEditarPlazo(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
+                    <button type="button" onclick="window.toggleModalEditarPlazo(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg transition">
                         Cancelar
                     </button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20">
@@ -704,7 +724,7 @@
                     </div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Asistente de Exportación PDF</h3>
                 </div>
-                <button onclick="toggleModalPDF(false)" class="text-slate-400 hover:text-slate-200 transition">
+                <button onclick="window.toggleModalPDF(false)" class="text-slate-400 hover:text-slate-200 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
@@ -731,7 +751,7 @@
                         <input type="radio" name="seccion-pdf" value="facturas" class="text-blue-600 focus:ring-0">
                         <div>
                             <strong class="text-slate-100 block">Registro de Comprobantes (Facturas/NC)</strong>
-                            <span class="text-[10px] text-slate-500">Detalle tabular de todos los documentos cargados desde Julio de 2026.</span>
+                            <span class="text-[10px] text-slate-500">Detalle tabular de todos los documentos cargados.</span>
                         </div>
                     </label>
                     <label class="flex items-center gap-3 bg-slate-950 hover:bg-slate-850 p-3 rounded-xl border border-slate-800 cursor-pointer transition">
@@ -745,8 +765,8 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <button onclick="toggleModalPDF(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg text-xs transition">Cancelar</button>
-                <button onclick="ejecutarExportacionPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-lg shadow-indigo-600/20">
+                <button onclick="window.toggleModalPDF(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="window.ejecutarExportacionPDF()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-lg shadow-indigo-600/20">
                     <i class="fa-solid fa-print mr-1"></i> Generar Reporte / PDF
                 </button>
             </div>
@@ -790,25 +810,26 @@
 
     <!-- LOGICA DE CONTROL EN JAVASCRIPT CON FIREBASE -->
     <script type="module">
-        // Importar módulos de Firebase v11.6.1
+        // 1. Importar módulos de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // =========================================================================
+        // 🚀 PASO 1: TU CONFIGURACIÓN DE FIREBASE (Ya completada)
+        // =========================================================================
+        const miFirebaseConfig = {
+            apiKey: "AIzaSyC7c0K8Alxlj9EGlZo98IEdoFQpuxSkWWg",
+            authDomain: "tablero-proveedores-97589.firebaseapp.com",
+            projectId: "tablero-proveedores-97589",
+            storageBucket: "tablero-proveedores-97589.firebasestorage.app",
+            messagingSenderId: "297535359638",
+            appId: "1:297535359638:web:9d1e63c50a6474f66a10b7"
+        };
+        // =========================================================================
 
-        const firebaseConfig = {
-  apiKey: "AIzaSyC7c0K8Alxlj9EGlZo98IEdoFQpuxSkWWg",
-  authDomain: "tablero-proveedores-97589.firebaseapp.com",
-  projectId: "tablero-proveedores-97589",
-  storageBucket: "tablero-proveedores-97589.firebasestorage.app",
-  messagingSenderId: "297535359638",
-  appId: "1:297535359638:web:9d1e63c50a6474f66a10b7"
-};
-
-        // Soporte tanto para Canvas (variables inyectadas) como para tu código local/Github
-        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : miFirebaseConfig;
         
-        // Inicializar Firebase
         const app = initializeApp(finalConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -817,58 +838,61 @@
         let docRef = null;
 
         const PROVEEDORES_SEMILLA = [
-            { nombre: "TARGET", a: 6371778.36, b: 76606774.00, pagado: 29047443.33, plazo: 30 },
-            { nombre: "CITY GIRL", a: 0.00, b: 22815485.77, pagado: 7985420.00, plazo: 30 },
-            { nombre: "MODAX", a: 1189655.03, b: 7619361.85, pagado: 3083155.80, plazo: 15 },
-            { nombre: "MISS MEI - JULIETA", a: 0.00, b: 7694205.00, pagado: 2692971.00, plazo: 30 },
-            { nombre: "DAMIAN NAU", a: 279945.20, b: 5249801.57, pagado: 1935411.00, plazo: 45 },
-            { nombre: "PINK 21", a: 0.00, b: 4083001.83, pagado: 1429050.00, plazo: 30 },
-            { nombre: "THELMA Y LOUIS", a: 0.00, b: 2838819.50, pagado: 993586.00, plazo: 30 },
-            { nombre: "FERPAMAR", a: 1494516.11, b: 1348864.23, pagado: 995183.00, plazo: 15 },
-            { nombre: "LAUTIN", a: 995144.12, b: 798249.71, pagado: 627687.00, plazo: 30 },
-            { nombre: "TANGO EXPRESSO", a: 0.00, b: 2576194.42, pagado: 901668.00, plazo: 30 },
-            { nombre: "MELY COSMÉTICA", a: 0.00, b: 2102720.00, pagado: 735952.00, plazo: 30 },
-            { nombre: "PDB", a: 0.00, b: 1941927.13, pagado: 679674.00, plazo: 30 },
-            { nombre: "ALL BRANDS", a: 0.00, b: 1360410.61, pagado: 476143.00, plazo: 30 },
-            { nombre: "OMAR LENTES - NUEVO", a: 0.00, b: 850900.00, pagado: 297815.00, plazo: 30 },
-            { nombre: "POLIPLAST", a: 830031.25, b: 0.00, pagado: 290510.00, plazo: 30 },
-            { nombre: "CAREY", a: 47647.66, b: 606331.34, pagado: 228892.00, plazo: 30 },
-            { nombre: "JL IMPORTACIONES", a: 19392.68, b: 683690.54, pagado: 246079.00, plazo: 30 },
-            { nombre: "OMAR LENTES - VIEJO", a: 0.00, b: 550118.34, pagado: 192541.00, plazo: 30 },
-            { nombre: "TENDENCE (TARGET)", a: 170988.45, b: 413209.99, pagado: 204469.00, plazo: 30 },
-            { nombre: "EDI IMPORTACION", a: 0.00, b: 143644.42, pagado: 50275.00, plazo: 30 },
-            { nombre: "FASHION BIJOU S.A.", a: 143748.00, b: 331452.00, pagado: 166320.00, plazo: 30 },
-            { nombre: "LESEDIFE", a: 476062.96, b: 390288.00, pagado: 303222.00, plazo: 30 },
-            { nombre: "COLOURS S.A", a: 0.00, b: 37738.32, pagado: 13208.00, plazo: 30 },
-            { nombre: "CLICKER", a: 0.00, b: 19820.93, pagado: 6937.00, plazo: 30 },
-            { nombre: "TXT (Bolsas)", a: 0.00, b: 129600.00, pagado: 45360.00, plazo: 30 },
-            { nombre: "WABRO", a: 95299.98, b: 0.00, pagado: 33355.00, plazo: 30 },
-            { nombre: "WATOTO - CINTAS Y FILM", a: 169700.95, b: 0.00, pagado: 59395.00, plazo: 30 },
-            { nombre: "BAG COMPANY - TARGET", a: -3278.60, b: 2077.92, pagado: 0.00, plazo: 30 },
-            { nombre: "QUO", a: 0.00, b: 640.47, pagado: 224.00, plazo: 30 }
+            { nombre: "TARGET", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "CITY GIRL", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "MODAX", a: 0.00, b: 0.00, pagado: 0.00, plazo: 15 },
+            { nombre: "MISS MEI - JULIETA", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "DAMIAN NAU", a: 0.00, b: 0.00, pagado: 0.00, plazo: 45 },
+            { nombre: "PINK 21", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "THELMA Y LOUIS", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "FERPAMAR", a: 0.00, b: 0.00, pagado: 0.00, plazo: 15 },
+            { nombre: "LAUTIN", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "TANGO EXPRESSO", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "MELY COSMÉTICA", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "PDB", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "ALL BRANDS", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "OMAR LENTES - NUEVO", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "POLIPLAST", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "CAREY", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "JL IMPORTACIONES", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "OMAR LENTES - VIEJO", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "TENDENCE (TARGET)", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "EDI IMPORTACION", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "FASHION BIJOU S.A.", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "LESEDIFE", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "COLOURS S.A", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "CLICKER", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "TXT (Bolsas)", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "WABRO", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "WATOTO - CINTAS Y FILM", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "BAG COMPANY - TARGET", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 },
+            { nombre: "QUO", a: 0.00, b: 0.00, pagado: 0.00, plazo: 30 }
         ];
 
         let state = {
             proveedores: [],
             facturas: [],
-            pagos: []
+            pagos: [],
+            ciclos: [] // Nuevo historial de ciclos
         };
 
         let chartPie = null;
         let chartEvo = null;
 
-        // Formateador monetario para moneda argentina ARS
+        // Formateador monetario
         const formatter = new Intl.NumberFormat('es-AR', {
             style: 'currency',
             currency: 'ARS',
             minimumFractionDigits: 2
         });
 
-        // MODALS PERSONALIZADOS (REEMPLAZO DE CONFIRM Y ALERT)
-        let onConfirmCallback = null;
-
-        function showConfirm(message, callback) {
-            onConfirmCallback = callback;
+        // ==========================================
+        // 2. EXPOSICIÓN DE FUNCIONES AL OBJETO WINDOW
+        // ==========================================
+        // Definimos las funciones y las asignamos a window para que los eventos onclick del HTML puedan llamarlas
+        
+        window.showConfirm = function(message, callback) {
+            window.onConfirmCallback = callback;
             document.getElementById('modal-confirm-text').innerText = message;
             const modal = document.getElementById('modal-confirm');
             const content = document.getElementById('modal-confirm-content');
@@ -879,21 +903,21 @@
             }, 10);
         }
 
-        function closeConfirm(accepted) {
+        window.closeConfirm = function(accepted) {
             const modal = document.getElementById('modal-confirm');
             const content = document.getElementById('modal-confirm-content');
             modal.classList.add('opacity-0');
             content.classList.add('scale-95');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                if (accepted && onConfirmCallback) {
-                    onConfirmCallback();
+                if (accepted && window.onConfirmCallback) {
+                    window.onConfirmCallback();
                 }
-                onConfirmCallback = null;
+                window.onConfirmCallback = null;
             }, 300);
         }
 
-        function showAlert(message, iconClass = 'fa-circle-info', colorClass = 'text-blue-400') {
+        window.showAlert = function(message, iconClass = 'fa-circle-info', colorClass = 'text-blue-400') {
             document.getElementById('modal-alert-text').innerText = message;
             const iconEl = document.getElementById('modal-alert-icon');
             iconEl.className = `fa-solid ${iconClass} text-2xl`;
@@ -910,7 +934,7 @@
             }, 10);
         }
 
-        function closeAlert() {
+        window.closeAlert = function() {
             const modal = document.getElementById('modal-alert');
             const content = document.getElementById('modal-alert-content');
             modal.classList.add('opacity-0');
@@ -920,8 +944,272 @@
             }, 300);
         }
 
-        // CONTROL DE MODAL PROVEEDORES
-        function toggleModalProveedor(show) {
+        window.showToast = function(msg, icon, bgColor) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMsg = document.getElementById('toast-msg');
+
+            if (toast && toastIcon && toastMsg) {
+                toastMsg.innerText = msg;
+                toastIcon.className = `fa-solid ${icon} text-lg`;
+                toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-0 opacity-100 z-50 flex items-center gap-3 ${bgColor}`;
+
+                setTimeout(() => {
+                    toast.className = "fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-3";
+                }, 3500);
+            }
+        }
+
+        // =======================================================
+        // INTEGRACIÓN DE FIREBASE (Inicialización y Sincronización)
+        // =======================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            inicializarSelectoresFechas();
+            
+            const inputFechaFac = document.getElementById('fac-fecha');
+            const inputFechaPago = document.getElementById('pago-fecha');
+            if(inputFechaFac) inputFechaFac.value = new Date().toISOString().split('T')[0];
+            if(inputFechaPago) inputFechaPago.value = new Date().toISOString().split('T')[0];
+            
+            // Asignar eventos de modals estáticos
+            document.getElementById('btn-confirm-accept').addEventListener('click', () => window.closeConfirm(true));
+            document.getElementById('btn-confirm-cancel').addEventListener('click', () => window.closeConfirm(false));
+            document.getElementById('btn-alert-close').addEventListener('click', window.closeAlert);
+
+            inicializarApp();
+        });
+
+        async function inicializarApp() {
+            window.showToast("Conectando a Firebase...", "fa-cloud", "bg-blue-600");
+            
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error de autenticación Firebase:", error);
+                window.showToast("Fallo al autenticar", "fa-triangle-exclamation", "bg-rose-600");
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    
+                    if (typeof __app_id !== 'undefined') {
+                        docRef = doc(db, 'artifacts', __app_id, 'users', userId, 'dashboard', 'main_state');
+                    } else {
+                        docRef = doc(db, 'datos_dashboard', 'estado_principal'); 
+                    }
+                    
+                    iniciarSincronizacion();
+                }
+            });
+        }
+
+        let isFirstLoad = true;
+        function iniciarSincronizacion() {
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    state = docSnap.data();
+                    if (!state.ciclos) state.ciclos = []; // Compatibilidad hacia atrás
+                    
+                    if (isFirstLoad) {
+                        window.showToast("Sincronización exitosa con la nube.", "fa-cloud-check", "bg-emerald-600");
+                        isFirstLoad = false;
+                    }
+                } else {
+                    console.log("No se encontraron datos en la nube. Cargando semilla por defecto...");
+                    window.cargarSemillaPorDefecto();
+                }
+                
+                window.actualizarSelectores();
+                window.actualizarTablas();
+                window.actualizarDashboard();
+                window.renderizarCiclos();
+            }, (error) => {
+                console.error("Error en onSnapshot de Firebase: ", error);
+                window.showToast("Error de sincronización con la nube", "fa-xmark", "bg-rose-600");
+            });
+        }
+
+        window.guardarEstado = async function() {
+            if (!docRef) return;
+            try {
+                await setDoc(docRef, state);
+            } catch (e) {
+                console.error("Error guardando en Firebase:", e);
+                window.showToast("No se pudo guardar en la nube.", "fa-triangle-exclamation", "bg-rose-600");
+            }
+        }
+
+        window.cargarSemillaPorDefecto = function() {
+            state.proveedores = PROVEEDORES_SEMILLA.map(p => ({
+                nombre: p.nombre,
+                plazoPredeterminado: p.plazo || 30
+            }));
+
+            state.facturas = PROVEEDORES_SEMILLA.map((p, idx) => ({
+                id: `HIST-${1000 + idx}`,
+                fecha: new Date().toISOString().split('T')[0],
+                proveedor: p.nombre,
+                tipo: 'Saldo Inicial (Ene-Jun)',
+                plazo: 0,
+                vencimiento: new Date().toISOString().split('T')[0],
+                montoA: 0.00,
+                montoB: 0.00,
+                total: 0.00,
+                obs: "Arranque consolidado en cero"
+            }));
+
+            state.pagos = [];
+            state.ciclos = [];
+            window.guardarEstado();
+        }
+
+        // ==========================================
+        // 3. NUEVAS FUNCIONES DE RESPALDO Y CICLOS
+        // ==========================================
+
+        window.importarDatos = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            window.showConfirm("¿Estás seguro de cargar este respaldo? Sobrescribirá todos los datos actuales en la nube y no se puede deshacer.", () => {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const parsedData = JSON.parse(e.target.result);
+                        if (parsedData.proveedores && parsedData.facturas && parsedData.pagos) {
+                            state = parsedData;
+                            if (!state.ciclos) state.ciclos = [];
+                            
+                            await window.guardarEstado(); // Aseguramos que se guarde en Firebase inmediatamente
+                            
+                            window.actualizarSelectores();
+                            window.actualizarTablas();
+                            window.actualizarDashboard();
+                            window.renderizarCiclos();
+                            window.showToast("Datos restaurados y sincronizados exitosamente.", "fa-file-import", "bg-emerald-600");
+                        } else {
+                            window.showAlert("El archivo JSON no tiene un formato válido.", "fa-triangle-exclamation", "text-rose-400");
+                        }
+                    } catch (err) {
+                        window.showAlert("Ocurrió un error al leer el archivo JSON.", "fa-triangle-exclamation", "text-rose-400");
+                    }
+                    event.target.value = ''; // Resetear el input
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        window.confirmarCerrarCiclo = function() {
+            window.showConfirm("¿Estás seguro de cerrar el ciclo actual? Esto guardará un resumen en el historial, dejará deudas en 0, y borrará todas las facturas y pagos actuales. Solo se conservarán los proveedores.", () => {
+                window.ejecutarCerrarCiclo();
+            });
+        }
+
+        window.ejecutarCerrarCiclo = function() {
+            let compTotalA = state.facturas.reduce((acc, f) => acc + f.montoA, 0);
+            let compTotalB = state.facturas.reduce((acc, f) => acc + f.montoB, 0);
+            let pagosTotalA = state.pagos.reduce((acc, p) => acc + p.montoA, 0);
+            let pagosTotalB = state.pagos.reduce((acc, p) => acc + p.montoB, 0);
+
+            let deudaFinal = (compTotalA + compTotalB) - (pagosTotalA + pagosTotalB);
+            
+            const nuevoCiclo = {
+                id: `CICLO-${Date.now()}`,
+                fechaCierre: new Date().toISOString().split('T')[0],
+                compradoA: compTotalA,
+                compradoB: compTotalB,
+                compradoTotal: compTotalA + compTotalB,
+                pagadoTotal: pagosTotalA + pagosTotalB,
+                deudaAlCierre: deudaFinal,
+                cantidadFacturas: state.facturas.length,
+                cantidadPagos: state.pagos.length
+            };
+
+            state.ciclos.push(nuevoCiclo);
+
+            // Resetear estado
+            state.pagos = [];
+            state.facturas = state.proveedores.map((p, idx) => ({
+                id: `HIST-${Date.now() + idx}`,
+                fecha: new Date().toISOString().split('T')[0],
+                proveedor: p.nombre,
+                tipo: 'Saldo Inicial (Ene-Jun)',
+                plazo: 0,
+                vencimiento: new Date().toISOString().split('T')[0],
+                montoA: 0.00,
+                montoB: 0.00,
+                total: 0.00,
+                obs: `Reinicio de Ciclo - ${new Date().toISOString().split('T')[0]}`
+            }));
+
+            window.guardarEstado();
+            window.cambiarTab('ciclos');
+            window.showToast("Ciclo cerrado exitosamente. Datos reseteados.", "fa-power-off", "bg-amber-600");
+        }
+
+        window.renderizarCiclos = function() {
+            const container = document.getElementById('lista-ciclos');
+            if (!container) return;
+
+            if (!state.ciclos || state.ciclos.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">No hay ciclos históricos registrados aún.</div>`;
+                return;
+            }
+
+            const ciclosOrdenados = [...state.ciclos].sort((a,b) => new Date(b.fechaCierre) - new Date(a.fechaCierre));
+
+            container.innerHTML = ciclosOrdenados.map((c, index) => `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col md:flex-row justify-between gap-4 transition hover:border-slate-700">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-amber-500/10 text-amber-500 w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-bold text-sm">Cierre de Ciclo #${state.ciclos.length - index}</h3>
+                            <p class="text-slate-400 text-xs">Fecha de cierre: <span class="text-slate-300 font-semibold">${c.fechaCierre}</span></p>
+                            <div class="flex gap-3 mt-2 text-[10px] text-slate-500">
+                                <span class="bg-slate-950 px-2 py-1 rounded"><i class="fa-solid fa-file-invoice mr-1"></i> ${c.cantidadFacturas} Comprobantes</span>
+                                <span class="bg-slate-950 px-2 py-1 rounded"><i class="fa-solid fa-wallet mr-1"></i> ${c.cantidadPagos} Pagos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-xs border-t md:border-t-0 md:border-l border-slate-800 pt-3 md:pt-0 md:pl-6">
+                        <div>
+                            <span class="block text-[10px] text-slate-500 uppercase">Comprado A</span>
+                            <span class="font-bold text-slate-300">${formatter.format(c.compradoA)}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-slate-500 uppercase">Comprado B</span>
+                            <span class="font-bold text-slate-300">${formatter.format(c.compradoB)}</span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <span class="block text-[10px] text-slate-500 uppercase">Total Comprado</span>
+                            <span class="font-bold text-white">${formatter.format(c.compradoTotal)}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-slate-500 uppercase">Total Pagado</span>
+                            <span class="font-bold text-emerald-400">${formatter.format(c.pagadoTotal)}</span>
+                        </div>
+                        <div class="col-span-2 md:col-span-2">
+                            <span class="block text-[10px] text-slate-500 uppercase">Deuda Final al Cierre</span>
+                            <span class="font-bold text-amber-500">${formatter.format(c.deudaAlCierre)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // LÓGICA GENERAL DEL SISTEMA
+        // ==========================================
+
+        window.toggleModalProveedor = function(show) {
             const modal = document.getElementById('modal-proveedor');
             const content = document.getElementById('modal-content');
             if (show) {
@@ -940,8 +1228,7 @@
             }
         }
 
-        // CONTROL DE MODAL EDITAR PLAZO PROVEEDOR
-        function toggleModalEditarPlazo(show, provNombre = "") {
+        window.toggleModalEditarPlazo = function(show, provNombre = "") {
             const modal = document.getElementById('modal-editar-plazo');
             const content = document.getElementById('modal-editar-plazo-content');
             if (show) {
@@ -965,14 +1252,14 @@
             }
         }
 
-        function abrirModalEditarPlazo() {
+        window.abrirModalEditarPlazo = function() {
             const prov = document.getElementById('select-ficha-proveedor').value;
             if (prov) {
-                toggleModalEditarPlazo(true, prov);
+                window.toggleModalEditarPlazo(true, prov);
             }
         }
 
-        function guardarNuevoPlazo(event) {
+        window.guardarNuevoPlazo = function(event) {
             event.preventDefault();
             const provNombre = document.getElementById('edit-prov-nombre').value;
             const nuevoPlazo = parseInt(document.getElementById('edit-prov-plazo').value) || 30;
@@ -980,15 +1267,14 @@
             const idx = state.proveedores.findIndex(p => p.nombre === provNombre);
             if (idx !== -1) {
                 state.proveedores[idx].plazoPredeterminado = nuevoPlazo;
-                guardarEstado();
-                cargarDiagnosticoProveedor();
-                actualizarPlazoSugerido();
-                toggleModalEditarPlazo(false);
-                showToast(`Plazo de ${provNombre} actualizado a ${nuevoPlazo} días.`, "fa-clock", "bg-emerald-600");
+                window.guardarEstado();
+                window.cargarDiagnosticoProveedor();
+                window.actualizarPlazoSugerido();
+                window.toggleModalEditarPlazo(false);
+                window.showToast(`Plazo de ${provNombre} actualizado a ${nuevoPlazo} días.`, "fa-clock", "bg-emerald-600");
             }
         }
 
-        // INICIALIZADOR DE SELECTORES DE FECHAS DINÁMICAS (2026-2030)
         function inicializarSelectoresFechas() {
             const selectDesde = document.getElementById('filtro-desde');
             const selectHasta = document.getElementById('filtro-hasta');
@@ -1021,13 +1307,7 @@
             selectHasta.innerHTML = hastaHtml;
         }
 
-        // EVENT LISTENERS DE MODALS
-        document.getElementById('btn-confirm-accept').addEventListener('click', () => closeConfirm(true));
-        document.getElementById('btn-confirm-cancel').addEventListener('click', () => closeConfirm(false));
-        document.getElementById('btn-alert-close').addEventListener('click', closeAlert);
-
-        // AGREGAR NUEVO PROVEEDOR
-        function agregarProveedor(event) {
+        window.agregarProveedor = function(event) {
             event.preventDefault();
             const nombreInput = document.getElementById('prov-nombre').value.trim().toUpperCase();
             const plazoInput = parseInt(document.getElementById('prov-plazo').value) || 30;
@@ -1036,7 +1316,7 @@
 
             const existe = state.proveedores.some(p => p.nombre === nombreInput);
             if (existe) {
-                showToast("Este proveedor ya se encuentra registrado.", "fa-triangle-exclamation", "bg-rose-600");
+                window.showToast("Este proveedor ya se encuentra registrado.", "fa-triangle-exclamation", "bg-rose-600");
                 return;
             }
 
@@ -1045,232 +1325,26 @@
                 plazoPredeterminado: plazoInput
             });
 
-            // Registrar fila vacía de saldos iniciales del primer semestre
             const histId = `HIST-${Date.now()}`;
             state.facturas.push({
                 id: histId,
-                fecha: '2026-06-30',
+                fecha: new Date().toISOString().split('T')[0],
                 proveedor: nombreInput,
                 tipo: 'Saldo Inicial (Ene-Jun)',
                 plazo: 0,
-                vencimiento: '2026-06-30',
+                vencimiento: new Date().toISOString().split('T')[0],
                 montoA: 0.00,
                 montoB: 0.00,
                 total: 0.00,
-                obs: "Arranque consolidado 1er Semestre"
+                obs: "Arranque consolidado"
             });
 
-            state.pagos.push({
-                id: `HPAG-${Date.now()}`,
-                fecha: '2026-06-30',
-                proveedor: nombreInput,
-                forma: 'Transferencia',
-                facturaRef: histId,
-                montoA: 0.00,
-                montoB: 0.00,
-                total: 0.00,
-                ref: "Abono Histórico"
-            });
-
-            guardarEstado();
-            actualizarSelectores();
-            actualizarTablas();
-            actualizarDashboard();
-
-            toggleModalProveedor(false);
-            showToast(`Proveedor ${nombreInput} creado correctamente.`, "fa-user-check", "bg-emerald-600");
+            window.guardarEstado();
+            window.toggleModalProveedor(false);
+            window.showToast(`Proveedor ${nombreInput} creado correctamente.`, "fa-user-check", "bg-emerald-600");
         }
 
-        // =======================================================
-        // INTEGRACIÓN DE FIREBASE Y CARGA DE RESPALDOS
-        // =======================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            inicializarSelectoresFechas();
-            // Asignación de fechas de referencia para cargas rápidas
-            const inputFechaFac = document.getElementById('fac-fecha');
-            const inputFechaPago = document.getElementById('pago-fecha');
-            if(inputFechaFac) inputFechaFac.value = '2026-07-17';
-            if(inputFechaPago) inputFechaPago.value = '2026-07-17';
-            
-            inicializarApp();
-        });
-
-        async function inicializarApp() {
-            showToast("Conectando a Firebase...", "fa-cloud", "bg-blue-600");
-            
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error de autenticación Firebase:", error);
-                showToast("Fallo al autenticar", "fa-triangle-exclamation", "bg-rose-600");
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                    
-                    // Definición dinámica de la ruta
-                    if (typeof __app_id !== 'undefined') {
-                        docRef = doc(db, 'artifacts', __app_id, 'users', userId, 'dashboard', 'main_state');
-                    } else {
-                        docRef = doc(db, 'datos_dashboard', 'estado_principal'); 
-                    }
-                    
-                    iniciarSincronizacion();
-                }
-            });
-        }
-
-        let isFirstLoad = true;
-        function iniciarSincronizacion() {
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    state = docSnap.data();
-                    if (isFirstLoad) {
-                        showToast("Sincronización exitosa con la nube.", "fa-cloud-check", "bg-emerald-600");
-                        isFirstLoad = false;
-                    }
-                } else {
-                    console.log("No se encontraron datos en la nube. Cargando semilla por defecto...");
-                    cargarSemillaPorDefecto();
-                }
-                
-                actualizarSelectores();
-                actualizarTablas();
-                actualizarDashboard();
-            }, (error) => {
-                console.error("Error en onSnapshot de Firebase: ", error);
-                showToast("Error de sincronización con la nube", "fa-xmark", "bg-rose-600");
-            });
-        }
-
-        async function guardarEstado() {
-            if (!docRef) return;
-            try {
-                await setDoc(docRef, state);
-            } catch (e) {
-                console.error("Error guardando en Firebase:", e);
-                showToast("No se pudo guardar en la nube.", "fa-triangle-exclamation", "bg-rose-600");
-            }
-        }
-
-        function cargarSemillaPorDefecto() {
-            state.proveedores = PROVEEDORES_SEMILLA.map(p => ({
-                nombre: p.nombre,
-                plazoPredeterminado: p.plazo || 30
-            }));
-
-            // Carga de Comprobantes semilla del primer semestre
-            state.facturas = PROVEEDORES_SEMILLA.map((p, idx) => ({
-                id: `HIST-${1000 + idx}`,
-                fecha: '2026-06-30',
-                proveedor: p.nombre,
-                tipo: 'Saldo Inicial (Ene-Jun)',
-                plazo: 0,
-                vencimiento: '2026-06-30',
-                montoA: p.a,
-                montoB: p.b,
-                total: p.a + p.b,
-                obs: "Arranque consolidado 1er Semestre 2026"
-            }));
-
-            // Carga de Pagos del primer semestre
-            state.pagos = PROVEEDORES_SEMILLA.filter(p => p.pagado > 0).map((p, idx) => {
-                let totalC = p.a + p.b;
-                let propA = totalC > 0 ? (p.a / totalC) : 0;
-                let propB = totalC > 0 ? (p.b / totalC) : 0;
-                return {
-                    id: `HPAG-${1000 + idx}`,
-                    fecha: '2026-06-30',
-                    proveedor: p.nombre,
-                    forma: 'Transferencia',
-                    facturaRef: `HIST-${1000 + idx}`,
-                    montoA: Math.round(p.pagado * propA * 100) / 100,
-                    montoB: Math.round(p.pagado * propB * 100) / 100,
-                    total: p.pagado,
-                    ref: "Abono Histórico"
-                };
-            });
-
-            // Demo de transacciones activas de Julio de prueba
-            state.facturas.push({
-                id: "FAC-2001",
-                fecha: "2026-07-02",
-                proveedor: "TARGET",
-                tipo: "Factura",
-                plazo: 15,
-                vencimiento: "2026-07-17",
-                montoA: 150000.00,
-                montoB: 850000.00,
-                total: 1000000.00,
-                obs: "Mercadería detallada Julio"
-            });
-
-            state.facturas.push({
-                id: "FAC-2002",
-                fecha: "2026-07-05",
-                proveedor: "CITY GIRL",
-                tipo: "Factura",
-                plazo: 30,
-                vencimiento: "2026-08-05",
-                montoA: 0.00,
-                montoB: 1200000.00,
-                total: 1200000.00,
-                obs: "Segunda carga Julio"
-            });
-
-            guardarEstado();
-        }
-
-        // FUNCIÓN PARA CARGAR RESPALDO JSON
-        function cargarRespaldoJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            showConfirm("¿Estás seguro de que deseas cargar este respaldo? Esta acción sobrescribirá todos los datos actuales en la nube y no se puede deshacer.", () => {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    try {
-                        const contenido = e.target.result;
-                        const nuevoEstado = JSON.parse(contenido);
-                        
-                        // Validación básica de la estructura del JSON
-                        if (nuevoEstado && Array.isArray(nuevoEstado.proveedores) && Array.isArray(nuevoEstado.facturas) && Array.isArray(nuevoEstado.pagos)) {
-                            state = nuevoEstado;
-                            
-                            // FORZAMOS EL GUARDADO EN FIREBASE INMEDIATAMENTE Y ESPERAMOS QUE TERMINE
-                            if (docRef) {
-                                await setDoc(docRef, state);
-                            } else {
-                                console.warn("No hay conexión activa con Firebase, guardando solo en memoria temporal.");
-                            }
-
-                            // ACTUALIZAMOS LA INTERFAZ
-                            actualizarSelectores();
-                            actualizarTablas();
-                            actualizarDashboard();
-                            
-                            showToast("Respaldo cargado y sincronizado con éxito.", "fa-upload", "bg-emerald-600");
-                        } else {
-                            showAlert("El archivo JSON no tiene el formato correcto para este sistema.", "fa-triangle-exclamation", "text-rose-400");
-                        }
-                    } catch (error) {
-                        console.error("Error al procesar JSON:", error);
-                        showAlert("Hubo un error al leer el archivo. Asegúrate de que sea un JSON válido.", "fa-xmark", "text-rose-500");
-                    }
-                };
-                reader.readAsText(file);
-            });
-            // Reseteamos el input para que permita cargar el mismo archivo de nuevo si es necesario
-            event.target.value = '';
-        }
-
-        // SISTEMA DE NAVEGACIÓN ENTRE TABS
-        function cambiarTab(tabId) {
+        window.cambiarTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.remove('hidden');
@@ -1279,20 +1353,29 @@
                 btn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:bg-slate-900 hover:text-slate-100";
             });
 
+            // Re-estilizar el botón de ciclos si no está activo
+            const btnCiclos = document.getElementById('btn-tab-ciclos');
+            if(btnCiclos) btnCiclos.classList.add('mt-2', 'border', 'border-slate-800', 'bg-slate-950');
+
             const activeBtn = document.getElementById(`btn-tab-${tabId}`);
             if (activeBtn) {
-                activeBtn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10";
+                if(tabId === 'ciclos') {
+                    activeBtn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition shadow-lg mt-2 border border-amber-500/50 bg-amber-500/10 text-amber-400";
+                } else {
+                    activeBtn.className = "tab-btn flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition bg-blue-600 text-white shadow-lg shadow-blue-500/10";
+                }
             }
 
             if (tabId === 'dashboard') {
-                actualizarDashboard();
+                window.actualizarDashboard();
             } else if (tabId === 'ficha') {
-                cargarDiagnosticoProveedor();
+                window.cargarDiagnosticoProveedor();
+            } else if (tabId === 'ciclos') {
+                window.renderizarCiclos();
             }
         }
 
-        // ACTUALIZACIÓN DE SELECTORES
-        function actualizarSelectores() {
+        window.actualizarSelectores = function() {
             const selectFac = document.getElementById('fac-proveedor');
             const selectPago = document.getElementById('pago-proveedor');
             const selectFicha = document.getElementById('select-ficha-proveedor');
@@ -1304,11 +1387,10 @@
             if (selectPago) selectPago.innerHTML = `<option value="">-- Seleccione un Proveedor --</option>` + optionsHtml;
             if (selectFicha) selectFicha.innerHTML = `<option value="">-- Seleccione un Proveedor --</option>` + optionsHtml;
 
-            actualizarPlazoSugerido();
+            window.actualizarPlazoSugerido();
         }
 
-        // SUGERIR EL PLAZO CONFIGURADO EN EL FORMULARIO DE INGRESO
-        function actualizarPlazoSugerido() {
+        window.actualizarPlazoSugerido = function() {
             const provSel = document.getElementById('fac-proveedor').value;
             const inputPlazo = document.getElementById('fac-plazo');
             if (!provSel || !inputPlazo) return;
@@ -1319,23 +1401,21 @@
             }
         }
 
-        // ACTUALIZACIÓN DE LISTADOS Y TABLAS
-        function actualizarTablas() {
-            // Tabla de Facturas cargadas (excluyendo históricos de semestres pasados)
+        window.actualizarTablas = function() {
             const tbodyFac = document.getElementById('tabla-facturas-lista');
             if (tbodyFac) {
                 const facturasNoHist = state.facturas.filter(f => !f.id.startsWith('HIST'));
                 if (facturasNoHist.length === 0) {
-                    tbodyFac.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500">No hay facturas detalladas ingresadas desde Julio de 2026. Use el formulario izquierdo.</td></tr>`;
+                    tbodyFac.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500">No hay facturas detalladas ingresadas. Use el formulario izquierdo.</td></tr>`;
                 } else {
                     tbodyFac.innerHTML = facturasNoHist.map(f => {
                         let alertClass = "text-slate-400";
                         let alertText = f.tipo === 'Nota de Crédito' ? "N/A" : "En Fecha";
                         
                         if (f.tipo !== 'Nota de Crédito') {
-                            let hoy = new Date("2026-07-17");
+                            let hoy = new Date();
                             let vto = new Date(f.vencimiento);
-                            let saldo = f.total - calcularMontoPagadoDeFactura(f.id);
+                            let saldo = f.total - window.calcularMontoPagadoDeFactura(f.id);
 
                             if (saldo <= 1) {
                                 alertClass = "bg-emerald-950 text-emerald-400 border border-emerald-800";
@@ -1364,7 +1444,7 @@
                                     <span class="px-2 py-1 rounded-md text-[10px] font-bold ${alertClass}">${f.tipo === 'Nota de Crédito' ? 'N/A' : f.vencimiento}</span>
                                 </td>
                                 <td class="py-3 px-3 text-center filtro-print-hide">
-                                    <button onclick="confirmarEliminarFactura('${f.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                                    <button onclick="window.confirmarEliminarFactura('${f.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -1372,7 +1452,6 @@
                 }
             }
 
-            // Tabla de Pagos
             const tbodyPagos = document.getElementById('tabla-pagos-lista');
             if (tbodyPagos) {
                 const pagosNoHist = state.pagos.filter(p => !p.id.startsWith('HPAG'));
@@ -1390,18 +1469,17 @@
                             <td class="py-3 px-3 text-right font-bold text-emerald-400">${formatter.format(p.total)}</td>
                             <td class="py-3 px-3 text-center text-slate-300 font-semibold">${p.ref}</td>
                             <td class="py-3 px-3 text-center filtro-print-hide">
-                                <button onclick="confirmarEliminarPago('${p.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="window.confirmarEliminarPago('${p.id}')" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
                             </td>
                         </tr>
                     `).join('');
                 }
             }
 
-            renderizarHistoricos();
+            window.renderizarHistoricos();
         }
 
-        // RENDERIZAR TABLA HISTÓRICA ENE-JUN
-        function renderizarHistoricos() {
+        window.renderizarHistoricos = function() {
             const tbody = document.getElementById('tabla-historica-carga');
             if (!tbody) return;
 
@@ -1428,7 +1506,7 @@
                         </td>
                         <td class="py-3 px-4 text-center font-bold text-slate-300 text-xs">${formatter.format(saldo)}</td>
                         <td class="py-2 px-2 text-center filtro-print-hide">
-                            <button onclick="guardarFilaHistorica('${p.nombre}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition duration-150">
+                            <button onclick="window.guardarFilaHistorica('${p.nombre}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition duration-150">
                                 <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Guardar
                             </button>
                         </td>
@@ -1437,8 +1515,7 @@
             }).join('');
         }
 
-        // GUARDAR CAMBIOS DE UNA FILA DE HISTÓRICOS
-        function guardarFilaHistorica(provNombre) {
+        window.guardarFilaHistorica = function(provNombre) {
             let idString = provNombre.replace(/\s+/g, '_');
             let valA = parseFloat(document.getElementById(`hist-a-${idString}`).value) || 0;
             let valB = parseFloat(document.getElementById(`hist-b-${idString}`).value) || 0;
@@ -1452,15 +1529,15 @@
             } else {
                 state.facturas.push({
                     id: `HIST-${Date.now()}`,
-                    fecha: '2026-06-30',
+                    fecha: new Date().toISOString().split('T')[0],
                     proveedor: provNombre,
                     tipo: 'Saldo Inicial (Ene-Jun)',
                     plazo: 0,
-                    vencimiento: '2026-06-30',
+                    vencimiento: new Date().toISOString().split('T')[0],
                     montoA: valA,
                     montoB: valB,
                     total: valA + valB,
-                    obs: "Carga consolidada 1er Semestre 2026"
+                    obs: "Carga consolidada"
                 });
             }
 
@@ -1480,7 +1557,7 @@
 
                 state.pagos.push({
                     id: `HPAG-${Date.now()}`,
-                    fecha: '2026-06-30',
+                    fecha: new Date().toISOString().split('T')[0],
                     proveedor: provNombre,
                     forma: 'Transferencia',
                     facturaRef: `HIST-${Date.now()}`,
@@ -1491,25 +1568,24 @@
                 });
             }
 
-            guardarEstado();
-            showToast(`Saldo histórico de ${provNombre} actualizado en la nube.`, "fa-check", "bg-emerald-600");
+            window.guardarEstado();
+            window.showToast(`Saldo histórico de ${provNombre} actualizado.`, "fa-check", "bg-emerald-600");
         }
 
-        function calcularMontoPagadoDeFactura(facturaId) {
+        window.calcularMontoPagadoDeFactura = function(facturaId) {
             return state.pagos
                 .filter(p => p.facturaRef === facturaId)
                 .reduce((acc, p) => acc + p.total, 0);
         }
 
-        // CARGA Y LÓGICA DE FACTURAS
-        function calcularTotalFactura() {
+        window.calcularTotalFactura = function() {
             let a = parseFloat(document.getElementById('fac-monto-a').value) || 0;
             let b = parseFloat(document.getElementById('fac-monto-b').value) || 0;
             const totalCalc = document.getElementById('fac-total-calculado');
             if (totalCalc) totalCalc.innerText = formatter.format(a + b);
         }
 
-        function verificarTipoComprobante() {
+        window.verificarTipoComprobante = function() {
             let tipo = document.getElementById('fac-tipo').value;
             let plazoInput = document.getElementById('fac-plazo');
             if (tipo === 'Nota de Crédito') {
@@ -1517,11 +1593,11 @@
                 plazoInput.disabled = true;
             } else {
                 plazoInput.disabled = false;
-                actualizarPlazoSugerido();
+                window.actualizarPlazoSugerido();
             }
         }
 
-        function guardarFactura(event) {
+        window.guardarFactura = function(event) {
             event.preventDefault();
             let fecha = document.getElementById('fac-fecha').value;
             let prov = document.getElementById('fac-proveedor').value;
@@ -1532,7 +1608,7 @@
             let obs = document.getElementById('fac-obs').value || "S/D";
 
             if (montoA === 0 && montoB === 0) {
-                showAlert("Debes ingresar un monto mayor a cero para la parte A o la parte B.", "fa-triangle-exclamation", "text-amber-400");
+                window.showAlert("Debes ingresar un monto mayor a cero para la parte A o la parte B.", "fa-triangle-exclamation", "text-amber-400");
                 return;
             }
 
@@ -1556,27 +1632,26 @@
                 obs: obs
             });
 
-            guardarEstado();
+            window.guardarEstado();
             
             document.getElementById('form-factura').reset();
-            document.getElementById('fac-fecha').value = '2026-07-17';
+            document.getElementById('fac-fecha').value = new Date().toISOString().split('T')[0];
             document.getElementById('fac-total-calculado').innerText = "$0,00";
-            actualizarPlazoSugerido();
+            window.actualizarPlazoSugerido();
             
-            showToast(`Comprobante ${nuevoId} guardado con éxito.`, "fa-circle-check", "bg-blue-600");
+            window.showToast(`Comprobante ${nuevoId} guardado con éxito.`, "fa-circle-check", "bg-blue-600");
         }
 
-        function confirmarEliminarFactura(id) {
-            showConfirm(`¿Seguro que deseas eliminar el comprobante ${id}? Esto anulará todos sus pagos asociados.`, () => {
+        window.confirmarEliminarFactura = function(id) {
+            window.showConfirm(`¿Seguro que deseas eliminar el comprobante ${id}? Esto anulará todos sus pagos asociados.`, () => {
                 state.pagos = state.pagos.filter(p => p.facturaRef !== id);
                 state.facturas = state.facturas.filter(f => f.id !== id);
-                guardarEstado();
-                showToast("Comprobante eliminado con éxito.", "fa-trash", "bg-rose-600");
+                window.guardarEstado();
+                window.showToast("Comprobante eliminado con éxito.", "fa-trash", "bg-rose-600");
             });
         }
 
-        // LÓGICA DE REGISTRO DE PAGOS
-        function actualizarFacturasParaPago() {
+        window.actualizarFacturasParaPago = function() {
             const prov = document.getElementById('pago-proveedor').value;
             const selectRef = document.getElementById('pago-factura-ref');
             if (!selectRef) return;
@@ -1587,7 +1662,7 @@
 
             let facs = state.facturas.filter(f => f.proveedor === prov && f.tipo !== 'Nota de Crédito');
             facs.forEach(f => {
-                let pagado = calcularMontoPagadoDeFactura(f.id);
+                let pagado = window.calcularMontoPagadoDeFactura(f.id);
                 let saldo = f.total - pagado;
                 if (saldo > 1) {
                     selectRef.innerHTML += `<option value="${f.id}">${f.id} (${f.fecha}) - Saldo: ${formatter.format(saldo)}</option>`;
@@ -1595,14 +1670,14 @@
             });
         }
 
-        function calcularTotalPago() {
+        window.calcularTotalPago = function() {
             let a = parseFloat(document.getElementById('pago-monto-a').value) || 0;
             let b = parseFloat(document.getElementById('pago-monto-b').value) || 0;
             const totalCalc = document.getElementById('pago-total-calculado');
             if (totalCalc) totalCalc.innerText = formatter.format(a + b);
         }
 
-        function guardarPago(event) {
+        window.guardarPago = function(event) {
             event.preventDefault();
             let fecha = document.getElementById('pago-fecha').value;
             let prov = document.getElementById('pago-proveedor').value;
@@ -1613,12 +1688,12 @@
             let montoB = parseFloat(document.getElementById('pago-monto-b').value) || 0;
 
             if (!prov) {
-                showAlert("Debes seleccionar un proveedor válido para imputar el pago.", "fa-user-slash", "text-rose-400");
+                window.showAlert("Debes seleccionar un proveedor válido para imputar el pago.", "fa-user-slash", "text-rose-400");
                 return;
             }
 
             if (montoA === 0 && montoB === 0) {
-                showAlert("El monto del abono debe ser superior a cero.", "fa-triangle-exclamation", "text-amber-400");
+                window.showAlert("El monto del abono debe ser superior a cero.", "fa-triangle-exclamation", "text-amber-400");
                 return;
             }
 
@@ -1636,26 +1711,25 @@
                 ref: refNum
             });
 
-            guardarEstado();
+            window.guardarEstado();
             
             document.getElementById('form-pago').reset();
-            document.getElementById('pago-fecha').value = '2026-07-17';
+            document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0];
             document.getElementById('pago-total-calculado').innerText = "$0,00";
             document.getElementById('pago-factura-ref').innerHTML = `<option value="">-- Sin Imputar (Pago a Cuenta General) --</option>`;
 
-            showToast(`Pago ${nuevoId} registrado correctamente.`, "fa-check", "bg-emerald-600");
+            window.showToast(`Pago ${nuevoId} registrado correctamente.`, "fa-check", "bg-emerald-600");
         }
 
-        function confirmarEliminarPago(id) {
-            showConfirm(`¿Deseas anular el registro de abono ${id}?`, () => {
+        window.confirmarEliminarPago = function(id) {
+            window.showConfirm(`¿Deseas anular el registro de abono ${id}?`, () => {
                 state.pagos = state.pagos.filter(p => p.id !== id);
-                guardarEstado();
-                showToast("Pago anulado.", "fa-trash", "bg-rose-600");
+                window.guardarEstado();
+                window.showToast("Pago anulado.", "fa-trash", "bg-rose-600");
             });
         }
 
-        // CONSOLIDADO GENERAL Y KPIS DEL DASHBOARD (2026 - 2030)
-        function actualizarDashboard() {
+        window.actualizarDashboard = function() {
             const filtroDesde = document.getElementById('filtro-desde').value;
             const filtroHasta = document.getElementById('filtro-hasta').value;
 
@@ -1677,7 +1751,6 @@
             let pagadoB = pagosFiltradas.reduce((acc, p) => acc + p.montoB, 0);
             let totalPagado = pagadoA + pagadoB;
 
-            // Deuda total acumulada a la fecha actual del sistema
             let compTotalA = state.facturas.reduce((acc, f) => acc + f.montoA, 0);
             let compTotalB = state.facturas.reduce((acc, f) => acc + f.montoB, 0);
             let pagosTotalA = state.pagos.reduce((acc, p) => acc + p.montoA, 0);
@@ -1687,14 +1760,13 @@
             let deudatransitB = compTotalB - pagosTotalB;
             let deudaTotal = deudatransitA + deudatransitB;
 
-            // Determinar vencidos contra el día de hoy
             let hoy = new Date();
             let deudavencida = 0;
 
             state.facturas.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
                 let vto = new Date(f.vencimiento);
                 if (vto < hoy) {
-                    let pagadoDeFac = calcularMontoPagadoDeFactura(f.id);
+                    let pagadoDeFac = window.calcularMontoPagadoDeFactura(f.id);
                     let saldoPendiente = f.total - pagadoDeFac;
                     if (saldoPendiente > 0) {
                         deudavencida += saldoPendiente;
@@ -1716,13 +1788,12 @@
 
             document.getElementById('kpi-vencido').innerText = formatter.format(deudavencida);
 
-            renderGraficos(deudatransitA, deudatransitB, filtroDesde, filtroHasta);
-            renderTablaRanking(filtroDesde, filtroHasta);
-            cargarAlertasVencimiento();
+            window.renderGraficos(deudatransitA, deudatransitB, filtroDesde, filtroHasta);
+            window.renderTablaRanking(filtroDesde, filtroHasta);
+            window.cargarAlertasVencimiento();
         }
 
-        // BUSCAR / FILTRAR TABLA RANKING
-        function filtrarTablaRanking() {
+        window.filtrarTablaRanking = function() {
             const input = document.getElementById('buscador-ranking').value.toUpperCase();
             const tabla = document.getElementById('tabla-ranking');
             const filas = tabla.getElementsByTagName('tr');
@@ -1740,8 +1811,7 @@
             }
         }
 
-        // RENDERIZADO DE TABLA DE RANKING DE COMPRAS SEGÚN EL PERÍODO
-        function renderTablaRanking(desde, hasta) {
+        window.renderTablaRanking = function(desde, hasta) {
             const tbody = document.getElementById('tabla-ranking');
             if (!tbody) return;
 
@@ -1751,36 +1821,44 @@
 
                 let compA = facturasP.reduce((acc, f) => acc + f.montoA, 0);
                 let compB = facturasP.reduce((acc, f) => acc + f.montoB, 0);
-                let pagado = pagosP.reduce((acc, pg) => acc + pg.total, 0);
+                let pagadoA = pagosP.reduce((acc, pg) => acc + pg.montoA, 0);
+                let pagadoB = pagosP.reduce((acc, pg) => acc + pg.montoB, 0);
 
                 let totalC = compA + compB;
-                let deud = totalC - pagado;
+                let totalPagado = pagadoA + pagadoB;
+                let saldoA = compA - pagadoA;
+                let saldoB = compB - pagadoB;
+                let deud = totalC - totalPagado;
 
                 return {
                     nombre: p.nombre,
-                    a: compA,
-                    b: compB,
+                    compA: compA,
+                    compB: compB,
+                    saldoA: saldoA,
+                    saldoB: saldoB,
                     total: totalC,
-                    pagado: pagado,
+                    pagado: totalPagado,
                     deuda: deud
                 };
             });
 
-            // Ordenamiento por mayor volumen comprado (ranking descendente)
             dataProv.sort((a,b) => b.total - a.total);
 
             tbody.innerHTML = dataProv.map((p, index) => {
+                let colorA = p.saldoA > 0 ? "text-slate-300" : (p.saldoA < 0 ? "text-emerald-400" : "text-slate-500");
+                let colorB = p.saldoB > 0 ? "text-slate-300" : (p.saldoB < 0 ? "text-emerald-400" : "text-slate-500");
+
                 return `
                     <tr class="border-b border-slate-900 hover:bg-slate-950/40 transition duration-150">
                         <td class="py-3 px-4 font-extrabold text-slate-500">${index + 1}</td>
                         <td class="py-3 px-4 font-bold text-white">${p.nombre}</td>
-                        <td class="py-3 px-4 text-right text-slate-400">${formatter.format(p.a)}</td>
-                        <td class="py-3 px-4 text-right text-slate-400">${formatter.format(p.b)}</td>
+                        <td class="py-3 px-4 text-right font-medium ${colorA}">${formatter.format(p.saldoA)}</td>
+                        <td class="py-3 px-4 text-right font-medium ${colorB}">${formatter.format(p.saldoB)}</td>
                         <td class="py-3 px-4 text-right font-semibold text-slate-200">${formatter.format(p.total)}</td>
                         <td class="py-3 px-4 text-right text-emerald-400">${formatter.format(p.pagado)}</td>
                         <td class="py-3 px-4 text-right font-bold text-amber-500">${formatter.format(p.deuda)}</td>
                         <td class="py-3 px-4 text-center filtro-print-hide">
-                            <button onclick="irAFichaProveedor('${p.nombre}')" class="bg-blue-600/20 hover:bg-blue-600 border border-blue-500/30 text-blue-400 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition duration-200">
+                            <button onclick="window.irAFichaProveedor('${p.nombre}')" class="bg-blue-600/20 hover:bg-blue-600 border border-blue-500/30 text-blue-400 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition duration-200">
                                 <i class="fa-solid fa-folder-open mr-1"></i> Ficha
                             </button>
                         </td>
@@ -1789,17 +1867,16 @@
             }).join('');
         }
 
-        function irAFichaProveedor(provNombre) {
+        window.irAFichaProveedor = function(provNombre) {
             const selectFicha = document.getElementById('select-ficha-proveedor');
             if (selectFicha) {
                 selectFicha.value = provNombre;
-                cambiarTab('ficha');
-                cargarDiagnosticoProveedor();
+                window.cambiarTab('ficha');
+                window.cargarDiagnosticoProveedor();
             }
         }
 
-        // CONTROL DE ALERTAS LATERALES EN LA BARRA LATERAL
-        function cargarAlertasVencimiento() {
+        window.cargarAlertasVencimiento = function() {
             const container = document.getElementById('lista-alertas');
             if (!container) return;
 
@@ -1808,7 +1885,7 @@
 
             state.facturas.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
                 let vto = new Date(f.vencimiento);
-                let pagado = calcularMontoPagadoDeFactura(f.id);
+                let pagado = window.calcularMontoPagadoDeFactura(f.id);
                 let saldo = f.total - pagado;
 
                 if (saldo > 1) {
@@ -1859,8 +1936,7 @@
             }).join('');
         }
 
-        // DIAGNÓSTICO INDIVIDUAL (FICHA PROVEEDOR 360°)
-        function cargarDiagnosticoProveedor() {
+        window.cargarDiagnosticoProveedor = function() {
             const prov = document.getElementById('select-ficha-proveedor').value;
             const divVacio = document.getElementById('diagnostico-vacio');
             const divContenido = document.getElementById('diagnostico-contenido');
@@ -1897,7 +1973,7 @@
 
             facturasProv.filter(f => f.tipo !== 'Nota de Crédito' && f.tipo !== 'Saldo Inicial (Ene-Jun)').forEach(f => {
                 let vto = new Date(f.vencimiento);
-                let pagadoDeF = calcularMontoPagadoDeFactura(f.id);
+                let pagadoDeF = window.calcularMontoPagadoDeFactura(f.id);
                 let saldoF = f.total - pagadoDeF;
 
                 if (saldoF > 0) {
@@ -1987,8 +2063,7 @@
             }
         }
 
-        // DETALLE DE GRÁFICOS (CHART.JS) - AUTOADAPTABLE AL PERÍODO SELECCIONADO
-        function renderGraficos(deudaA, deudaB, desde, hasta) {
+        window.renderGraficos = function(deudaA, deudaB, desde, hasta) {
             const canvasPie = document.getElementById('chartPieAB');
             if (canvasPie) {
                 const ctxPie = canvasPie.getContext('2d');
@@ -2027,7 +2102,6 @@
                     chartEvo.destroy();
                 }
 
-                // Generamos los meses en el rango
                 let listaMeses = [];
                 let [anioD, mesD] = desde.split('-').map(Number);
                 let [anioH, mesH] = hasta.split('-').map(Number);
@@ -2046,7 +2120,6 @@
                     }
                 }
 
-                // Agrupamos compras A, B y pagos por mes
                 let comprasMensualA = Array(listaMeses.length).fill(0);
                 let comprasMensualB = Array(listaMeses.length).fill(0);
                 let pagosMensual = Array(listaMeses.length).fill(0);
@@ -2068,7 +2141,6 @@
                     }
                 });
 
-                // Mapeamos etiquetas legibles, ej: "Jul 26", "Ene 27"
                 const nombresMesesCortos = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
                 let labelsEvo = listaMeses.map(m => {
                     let [anio, mes] = m.split('-');
@@ -2130,8 +2202,7 @@
             }
         }
 
-        // ASISTENTE DE EXPORTACIÓN SELECTIVA A PDF / IMPRESIÓN
-        function toggleModalPDF(show) {
+        window.toggleModalPDF = function(show) {
             const modal = document.getElementById('modal-export-pdf');
             const content = document.getElementById('modal-export-pdf-content');
             if (show) {
@@ -2149,11 +2220,11 @@
             }
         }
 
-        function abrirModalPDF() {
-            toggleModalPDF(true);
+        window.abrirModalPDF = function() {
+            window.toggleModalPDF(true);
         }
 
-        function ejecutarExportacionPDF() {
+        window.ejecutarExportacionPDF = function() {
             const radios = document.getElementsByName('seccion-pdf');
             let seccionSeleccionada = 'dashboard';
             
@@ -2164,19 +2235,16 @@
                 }
             }
 
-            // Cerrar el modal del asistente de PDF
-            toggleModalPDF(false);
+            window.toggleModalPDF(false);
 
-            // Obtener el ID del contenedor que queremos imprimir
             let idTarget = '';
             if (seccionSeleccionada === 'dashboard') {
                 idTarget = 'tab-dashboard';
             } else if (seccionSeleccionada === 'ficha') {
                 idTarget = 'tab-ficha';
-                // Si la ficha está oculta por no haber seleccionado un proveedor, avisar al usuario
                 const provVal = document.getElementById('select-ficha-proveedor').value;
                 if (!provVal) {
-                    showAlert("Primero debes seleccionar un proveedor en la pestaña de Diagnóstico para poder imprimir su ficha.", "fa-user-slash", "text-rose-400");
+                    window.showAlert("Primero debes seleccionar un proveedor en la pestaña de Diagnóstico para poder imprimir su ficha.", "fa-user-slash", "text-rose-400");
                     return;
                 }
             } else if (seccionSeleccionada === 'facturas') {
@@ -2188,63 +2256,26 @@
             const elementToPrint = document.getElementById(idTarget);
             if (!elementToPrint) return;
 
-            // Marcamos la sección seleccionada y activamos el layout de impresión
             elementToPrint.classList.add('print-target');
             document.body.classList.add('printing-active');
 
-            // Pequeño timeout para permitir que los gráficos se adapten al layout de página
             setTimeout(() => {
                 window.print();
-                
-                // Limpiamos los estilos temporales post-impresión
                 elementToPrint.classList.remove('print-target');
                 document.body.classList.remove('printing-active');
-                showToast("Reporte PDF generado correctamente.", "fa-file-pdf", "bg-emerald-600");
+                window.showToast("Reporte PDF generado correctamente.", "fa-file-pdf", "bg-emerald-600");
             }, 500);
         }
 
-        // RESPALDO DE SEGURIDAD EN FORMATO JSON
-        function exportarDatos() {
+        window.exportarDatos = function() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", `cuenta_corriente_proveedores_backup_${new Date().toISOString().substring(0,10)}.json`);
             dlAnchorElem.click();
-            showToast("Respaldo JSON generado correctamente.", "fa-file-arrow-down", "bg-emerald-600");
+            window.showToast("Respaldo JSON generado correctamente.", "fa-file-arrow-down", "bg-emerald-600");
         }
 
-        // NOTIFICACIONES FLOTANTES (TOAST)
-        function showToast(msg, icon, bgColor) {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toast-icon');
-            const toastMsg = document.getElementById('toast-msg');
-
-            if (toast && toastIcon && toastMsg) {
-                toastMsg.innerText = msg;
-                toastIcon.className = `fa-solid ${icon} text-lg`;
-                toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-0 opacity-100 z-50 flex items-center gap-3 ${bgColor}`;
-
-                setTimeout(() => {
-                    toast.className = "fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 z-50 flex items-center gap-3";
-                }, 3500);
-            }
-        }
-
-        // =======================================================
-        // EXPORTAR FUNCIONES AL OBJETO WINDOW 
-        // (Requerido al usar `<script type="module">` con HTML inline)
-        // =======================================================
-        Object.assign(window, {
-            abrirModalPDF, exportarDatos, cambiarTab, cargarRespaldoJSON,
-            toggleModalProveedor, actualizarDashboard, filtrarTablaRanking, 
-            cargarDiagnosticoProveedor, abrirModalEditarPlazo, toggleModalEditarPlazo, 
-            guardarNuevoPlazo, guardarFactura, actualizarPlazoSugerido, 
-            verificarTipoComprobante, calcularTotalFactura, confirmarEliminarFactura, 
-            guardarPago, actualizarFacturasParaPago, calcularTotalPago, 
-            confirmarEliminarPago, guardarFilaHistorica, irAFichaProveedor, 
-            ejecutarExportacionPDF, toggleModalPDF, agregarProveedor, 
-            closeConfirm, closeAlert
-        });
     </script>
 </body>
 </html>
